@@ -27,5 +27,8 @@ export function useEvents() {
     if (error) { console.error("Create event failed:", error.message); return null; }
     return data as Event;
   }, []);
-  return { events, loading, createEvent };
+  const deleteEvent = useCallback(async (id: string): Promise<void> => {
+    await supabase.from("events").delete().eq("id", id);
+  }, []);
+  return { events, loading, createEvent, deleteEvent };
 }
