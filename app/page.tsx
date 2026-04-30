@@ -29,6 +29,7 @@ export default function Home() {
   }
   async function handleReset() {
     await routines.clearAll();
+    await chat.clearMessages();
     setTimeout(() => window.location.reload(), 800);
   }
   if (authLoading) return (
@@ -40,7 +41,15 @@ export default function Home() {
     </div>
   );
   if (!user) return <LoginScreen onEnter={handleEnter} />;
-  if (fullscreen) return <FullscreenMode routines={routines.routines} onExit={() => setFullscreen(false)} />;
+  if (fullscreen) return (
+    <FullscreenMode
+      routines={routines.routines}
+      onExit={() => setFullscreen(false)}
+      onMarkCompleted={routines.markCompleted}
+      onSetOnStage={routines.setOnStage}
+      onRemoveFromStage={routines.removeFromStage}
+    />
+  );
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header view={view} setView={setView} role={role} userName={user.name}
@@ -61,7 +70,7 @@ export default function Home() {
         </main>
         <ChatDrawer chat={chat} />
       </div>
-      {showEvents && <EventsModal events={events} activeEvent={activeEvent} onSwitch={(e:any)=>{switchEvent(e);setShowEvents(false);}} onCreate={async(n:string,d:string,l:string)=>{await routines.clearAll();await createEvent(n,d,l);}} onClose={()=>setShowEvents(false)} onReset={()=>{setShowEvents(false);setShowReset(true);}} />}
+      {showEvents && <EventsModal events={events} activeEvent={activeEvent} onSwitch={(e:any)=>{switchEvent(e);setShowEvents(false);}} onCreate={async(n:string,d:string,l:string)=>{await routines.clearAll();await chat.clearMessages();await createEvent(n,d,l);}} onClose={()=>setShowEvents(false)} onReset={()=>{setShowEvents(false);setShowReset(true);}} />}
       {showReset && <ResetModal onConfirm={handleReset} onClose={()=>setShowReset(false)} eventName={activeEvent?.name} />}
     </div>
   );
@@ -72,11 +81,7 @@ function EventsModal({ events, activeEvent, onSwitch, onCreate, onClose, onReset
   const [date, setDate] = useState("");
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
-  async function handleCreate(e:React.FormEvent) {
-    e.preventDefault(); setLoading(true);
-    await onCreate(name, date, location);
-    setLoading(false); onClose();
-  }
+  async function handleCreate(e:React.FormEvent) { e.preventDefault(); setLoading(true); await onCreate(name, date, location); setLoading(false); onClose(); }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{background:"rgba(0,0,0,0.8)"}} onClick={onClose}>
       <div className="w-full max-w-md rounded-[18px] border p-6" style={{background:"var(--card)",borderColor:"var(--border)"}} onClick={(e:any)=>e.stopPropagation()}>
@@ -88,10 +93,7 @@ function EventsModal({ events, activeEvent, onSwitch, onCreate, onClose, onReset
           {events.length===0 && <div className="font-mono text-[12px] text-gray-600 text-center py-4">No events yet</div>}
           {events.map((ev:any)=>(
             <button key={ev.id} className={`flex items-center gap-3 px-4 py-3 rounded-[10px] border text-left transition-all ${activeEvent?.id===ev.id?"border-pink-400/30 bg-pink-400/10":"border-[var(--border)]"}`} onClick={()=>onSwitch(ev)}>
-              <div className="flex-1">
-                <div className={`font-semibold text-[14px] ${activeEvent?.id===ev.id?"text-pink-400":"text-white"}`}>{ev.name}</div>
-                <div className="text-[12px] text-gray-500 mt-0.5">{ev.date} · {ev.location}</div>
-              </div>
+              <div className="flex-1"><div className={`font-semibold text-[14px] ${activeEvent?.id===ev.id?"text-pink-400":"text-white"}`}>{ev.name}</div><div className="text-[12px] text-gray-500 mt-0.5">{ev.date} · {ev.location}</div></div>
               {activeEvent?.id===ev.id && <span className="text-pink-400 text-[12px]">Active</span>}
             </button>
           ))}
