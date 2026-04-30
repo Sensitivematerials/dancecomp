@@ -41,11 +41,11 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
         )}
         {step === "show" && (
           <div>
-            <button onClick={() => { setStep("identity"); setCreating(false); setConfirmId(null); }} className="font-mono text-[11px] text-gray-500 hover:text-white transition-colors mb-5 flex items-center gap-1">← Back</button>
+            <button onClick={() => { setStep("identity"); setCreating(false); setConfirmId(null); }} className="font-mono text-[11px] text-gray-500 hover:text-white mb-5 flex items-center gap-1">← Back</button>
             <div className="font-mono text-[10px] tracking-[2px] uppercase text-gray-600 mb-3">{creating ? "Create New Show" : "Join a Show"}</div>
             {!creating ? (
               <>
-                <div className="flex flex-col gap-2.5 mb-4">
+                <div className="flex flex-col gap-3 mb-4">
                   {eventsLoading ? (
                     <div className="font-mono text-[12px] text-gray-600 text-center py-6">Loading shows...</div>
                   ) : events.length === 0 ? (
@@ -55,13 +55,21 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
                       <div className="text-[12px] text-gray-500">Create one below</div>
                     </div>
                   ) : events.map(ev => (
-                    <div key={ev.id} className="rounded-[14px] border overflow-hidden transition-all" style={{ background: "var(--card)", borderColor: confirmId===ev.id ? "rgba(255,82,88,0.4)" : "var(--border)" }}>
+                    <div key={ev.id} className="rounded-[14px] border overflow-hidden" style={{ background: "var(--card)", borderColor: confirmId===ev.id ? "rgba(255,82,88,0.5)" : "var(--border)" }}>
                       {confirmId === ev.id && (
-                        <div className="px-4 py-2.5 flex items-center justify-between gap-2" style={{ background: "rgba(255,82,88,0.10)", borderBottom: "1px solid rgba(255,82,88,0.2)" }}>
-                          <span className="text-[13px] text-red-400 font-medium">Delete this show?</span>
+                        <div className="px-4 py-2.5 flex items-center justify-between gap-2" style={{ background: "rgba(255,82,88,0.12)", borderBottom: "1px solid rgba(255,82,88,0.25)" }}>
+                          <span className="text-[13px] font-semibold text-red-400">Delete this show?</span>
                           <div className="flex gap-2">
-                            <button onClick={() => handleDelete(ev.id)} disabled={deletingId===ev.id} className="px-3 py-1.5 rounded-[6px] text-[12px] font-bold text-white disabled:opacity-40" style={{ background: "#ff5258" }}>{deletingId===ev.id ? "Deleting..." : "Yes Delete"}</button>
-                            <button onClick={() => setConfirmId(null)} className="px-3 py-1.5 rounded-[6px] text-[12px] text-gray-400 border" style={{ borderColor: "var(--border2)" }}>Cancel</button>
+                            <button onClick={() => handleDelete(ev.id)} disabled={deletingId===ev.id}
+                              className="px-3 py-1.5 rounded-[6px] text-[12px] font-bold text-white disabled:opacity-40"
+                              style={{ background: "#ff5258" }}>
+                              {deletingId===ev.id ? "Deleting..." : "Yes Delete"}
+                            </button>
+                            <button onClick={() => setConfirmId(null)}
+                              className="px-3 py-1.5 rounded-[6px] text-[12px] text-gray-400 border"
+                              style={{ borderColor: "var(--border2)" }}>
+                              Cancel
+                            </button>
                           </div>
                         </div>
                       )}
@@ -70,16 +78,20 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
                           <div className="font-bold text-[15px] truncate group-hover:text-pink-400 transition-colors">{ev.name}</div>
                           <div className="text-[12px] text-gray-500 mt-0.5">{ev.date}{ev.location ? ` · ${ev.location}` : ""}</div>
                         </button>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <div className="flex items-center gap-1 flex-shrink-0">
                           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                          <span className="font-mono text-[10px] text-emerald-400">LIVE</span>
+                          <span className="font-mono text-[10px] text-emerald-400 mr-1">LIVE</span>
                         </div>
                         <button onClick={() => setConfirmId(confirmId===ev.id ? null : ev.id)}
-                          className="w-8 h-8 rounded-[7px] border flex items-center justify-center text-[13px] transition-all flex-shrink-0 ml-1"
-                          style={{ borderColor: confirmId===ev.id ? "rgba(255,82,88,0.4)" : "var(--border2)", background: confirmId===ev.id ? "rgba(255,82,88,0.10)" : "transparent", color: confirmId===ev.id ? "#ff5258" : "var(--dim)" }}>
+                          className="w-9 h-9 rounded-[8px] border flex items-center justify-center flex-shrink-0 transition-all"
+                          style={{ borderColor: confirmId===ev.id ? "rgba(255,82,88,0.5)" : "var(--border2)", background: confirmId===ev.id ? "rgba(255,82,88,0.12)" : "var(--surface)", color: confirmId===ev.id ? "#ff5258" : "var(--dim)", fontSize: 15 }}>
                           🗑
                         </button>
-                        <button onClick={() => onEnter(name, role!, ev)} className="w-8 h-8 rounded-[7px] border flex items-center justify-center text-gray-500 hover:text-pink-400 transition-all flex-shrink-0" style={{ borderColor: "var(--border2)" }}>→</button>
+                        <button onClick={() => onEnter(name, role!, ev)}
+                          className="w-9 h-9 rounded-[8px] border flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-pink-400 transition-all"
+                          style={{ borderColor: "var(--border2)", background: "var(--surface)" }}>
+                          →
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -89,7 +101,7 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
             ) : (
               <form onSubmit={handleCreateShow} className="rounded-[16px] border p-5" style={{ background: "var(--card)", borderColor: "var(--border2)" }}>
                 <div className="flex flex-col gap-3 mb-4">
-                  <input autoFocus required placeholder="Show name (e.g. Spring Showcase 2025)" className="h-[50px] rounded-[10px] border px-4 text-[15px] outline-none placeholder-gray-600" style={inp} value={showName} onChange={e => setShowName(e.target.value)} />
+                  <input autoFocus required placeholder="Show name" className="h-[50px] rounded-[10px] border px-4 text-[15px] outline-none placeholder-gray-600" style={inp} value={showName} onChange={e => setShowName(e.target.value)} />
                   <input required placeholder="Date (e.g. May 3, 2025)" className="h-[50px] rounded-[10px] border px-4 text-[15px] outline-none placeholder-gray-600" style={inp} value={showDate} onChange={e => setShowDate(e.target.value)} />
                   <input placeholder="Venue / city (optional)" className="h-[50px] rounded-[10px] border px-4 text-[15px] outline-none placeholder-gray-600" style={inp} value={showVenue} onChange={e => setShowVenue(e.target.value)} />
                 </div>

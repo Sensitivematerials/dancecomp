@@ -23,18 +23,14 @@ export default function Home() {
   const [view, setView] = useState<ViewTab>("emcee");
   const [fullscreen, setFullscreen] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  function handleEnter(name: string, r: "emcee" | "backstage", ev: Event) {
-    signIn(name, r); setActiveEvent(ev); setView(r === "emcee" ? "emcee" : "backstage");
-  }
-  async function handleReset() {
-    await routines.clearAll(); await chat.clearMessages(); if (activeEvent) await deleteEvent(activeEvent.id); setActiveEvent(null); signOut();
-  }
+  function handleEnter(name: string, r: "emcee" | "backstage", ev: Event) { signIn(name, r); setActiveEvent(ev); setView(r === "emcee" ? "emcee" : "backstage"); }
+  async function handleReset() { await routines.clearAll(); await chat.clearMessages(); if (activeEvent) await deleteEvent(activeEvent.id); setActiveEvent(null); signOut(); }
   if (authLoading) return (
     <div className="h-screen flex items-center justify-center" style={{ background: "var(--black)" }}>
       <div className="text-center"><div className="font-display text-[36px] tracking-[4px] mb-3">Dance<span className="text-pink-500">Comp</span></div><div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600">Loading...</div></div>
     </div>
   );
-  if (!user || !activeEvent) return <LoginScreen events={events} eventsLoading={eventsLoading} onEnter={handleEnter} onCreate={createEvent} onDelete={deleteEvent} onDelete={deleteEvent} />;
+  if (!user || !activeEvent) return <LoginScreen events={events} eventsLoading={eventsLoading} onEnter={handleEnter} onCreate={createEvent} onDelete={deleteEvent} />;
   if (fullscreen) return <FullscreenMode routines={routines.routines} onExit={() => setFullscreen(false)} onMarkCompleted={routines.markCompleted} onSetOnStage={routines.setOnStage} onRemoveFromStage={routines.removeFromStage} />;
   return (
     <div className="h-screen flex flex-col overflow-hidden">
