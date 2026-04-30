@@ -28,6 +28,8 @@ export function useEvents() {
     return data as Event;
   }, []);
   const deleteEvent = useCallback(async (id: string): Promise<void> => {
+    // Optimistically remove immediately so UI updates instantly
+    setEvents(prev => prev.filter(e => e.id !== id));
     await supabase.from("events").delete().eq("id", id);
   }, []);
   return { events, loading, createEvent, deleteEvent };

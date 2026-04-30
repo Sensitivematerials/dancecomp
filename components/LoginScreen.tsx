@@ -9,7 +9,7 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
   const [confirmId, setConfirmId] = useState<string | null>(null); const [deletingId, setDeletingId] = useState<string | null>(null);
   function handleNext() { if (!name.trim()) { setError("Enter your name"); return; } if (!role) { setError("Pick a role"); return; } setError(""); setStep("show"); }
   async function handleCreateShow(e: React.FormEvent) { e.preventDefault(); if (!showName.trim()) return; setSaving(true); const ev = await onCreate(showName.trim(), showDate.trim(), showVenue.trim()); setSaving(false); if (ev) onEnter(name, role!, ev); }
-  async function handleDelete(id: string) { setDeletingId(id); await onDelete(id); setDeletingId(null); setConfirmId(null); }
+  async function handleDelete(id: string) { setDeletingId(id); setConfirmId(null); await onDelete(id); setDeletingId(null); }
   const inp = { background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" };
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-5 py-10" style={{ background: "var(--black)" }}>
