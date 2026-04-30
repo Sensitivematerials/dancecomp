@@ -33,7 +33,7 @@ export default function Home() {
       <Header view={view} setView={setView} role={role} userName={user.name}
         unread={chat.unread} chatOpen={chat.open}
         onToggleChat={chat.open ? chat.closeChat : chat.openChat}
-        onFullscreen={() => setFullscreen(true)} onSignOut={signOut}
+        onFullscreen={() => setFullscreen(true)} onSignOut={signOut} onReset={() => setShowReset(true)}
         activeEvent={activeEvent} onShowEvents={() => setShowEvents(true)} />
       <div className="flex flex-1 overflow-hidden relative">
         <main className="flex-1 overflow-y-auto p-4 md:p-7 transition-all duration-300"
