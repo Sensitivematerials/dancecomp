@@ -15,7 +15,7 @@ import { useEvents, Event } from "@/hooks/useEvents";
 export type ViewTab = "emcee" | "backstage" | "import";
 export default function Home() {
   const { user, role, loading: authLoading, signIn, signOut } = useAuth();
-  const { events, loading: eventsLoading, createEvent } = useEvents();
+  const { events, loading: eventsLoading, createEvent, deleteEvent } = useEvents();
   const [activeEvent, setActiveEvent] = useState<Event | null>(null);
   const eventSlug = activeEvent?.slug ?? "demo-event";
   const routines = useRoutines(eventSlug);
@@ -27,7 +27,7 @@ export default function Home() {
     signIn(name, r); setActiveEvent(ev); setView(r === "emcee" ? "emcee" : "backstage");
   }
   async function handleReset() {
-    await routines.clearAll(); await chat.clearMessages(); setActiveEvent(null); signOut();
+    await routines.clearAll(); await chat.clearMessages(); if (activeEvent) await deleteEvent(activeEvent.id); setActiveEvent(null); signOut();
   }
   if (authLoading) return (
     <div className="h-screen flex items-center justify-center" style={{ background: "var(--black)" }}>
