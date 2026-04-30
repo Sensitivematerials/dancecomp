@@ -28,7 +28,7 @@ export default function Home() {
 
   // Show login if not authenticated
   if (authLoading) return <LoadingScreen />;
-  if (!user)       return <LoginScreen />;
+  if (!user)       return <LoginScreen onEnter={handleEnter} />;
 
   // Full-screen DJ mode
   if (fullscreen) return <FullscreenMode routines={routines.routines} onExit={() => setFullscreen(false)} />;
