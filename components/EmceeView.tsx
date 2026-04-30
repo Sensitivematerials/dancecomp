@@ -6,7 +6,7 @@ import SectionLabel from "./ui/SectionLabel";
 import EmptyState   from "./ui/EmptyState";
 import Button        from "./ui/Button";
 
-type Props = ReturnType<typeof useRoutines>;
+type Props = ReturnType<typeof useRoutines> & { onFullscreen?: () => void };
 
 export default function EmceeView({ routines, setOnStage, markCompleted, removeFromStage }: Props) {
   const [checkinOpen, setCheckinOpen] = useState(false);
