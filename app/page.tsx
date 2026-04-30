@@ -29,6 +29,8 @@ export default function Home() {
   }
   async function handleReset() {
     await routines.clearAll();
+    setTimeout(() => window.location.reload(), 800);
+  }
   }
   if (authLoading) return (
     <div className="h-screen flex items-center justify-center" style={{ background:"var(--black)" }}>
