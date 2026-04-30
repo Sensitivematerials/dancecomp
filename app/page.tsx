@@ -8,7 +8,6 @@ import ChatDrawer from "@/components/ChatDrawer";
 import LoginScreen from "@/components/LoginScreen";
 import FullscreenMode from "@/components/FullscreenMode";
 import ResetModal from "@/components/ResetModal";
-import Lobby from "@/components/Lobby";
 import { useRoutines } from "@/hooks/useRoutines";
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,16 +23,18 @@ export default function Home() {
   const [view, setView] = useState<ViewTab>("emcee");
   const [fullscreen, setFullscreen] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  function handleEnter(name: string, r: "emcee" | "backstage") { signIn(name, r); setView(r === "emcee" ? "emcee" : "backstage"); }
-  async function handleCreateAndJoin(name: string, date: string, location: string) { const ev = await createEvent(name, date, location); if (ev) setActiveEvent(ev); }
-  async function handleReset() { await routines.clearAll(); await chat.clearMessages(); setActiveEvent(null); }
+  function handleEnter(name: string, r: "emcee" | "backstage", ev: Event) {
+    signIn(name, r); setActiveEvent(ev); setView(r === "emcee" ? "emcee" : "backstage");
+  }
+  async function handleReset() {
+    await routines.clearAll(); await chat.clearMessages(); setActiveEvent(null); signOut();
+  }
   if (authLoading) return (
     <div className="h-screen flex items-center justify-center" style={{ background: "var(--black)" }}>
       <div className="text-center"><div className="font-display text-[36px] tracking-[4px] mb-3">Dance<span className="text-pink-500">Comp</span></div><div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600">Loading...</div></div>
     </div>
   );
-  if (!user) return <LoginScreen onEnter={handleEnter} />;
-  if (!activeEvent) return <Lobby events={events} loading={eventsLoading} userName={user.name} role={role!} onJoin={(ev) => setActiveEvent(ev)} onCreate={handleCreateAndJoin} />;
+  if (!user || !activeEvent) return <LoginScreen events={events} eventsLoading={eventsLoading} onEnter={handleEnter} onCreate={createEvent} />;
   if (fullscreen) return <FullscreenMode routines={routines.routines} onExit={() => setFullscreen(false)} onMarkCompleted={routines.markCompleted} onSetOnStage={routines.setOnStage} onRemoveFromStage={routines.removeFromStage} />;
   return (
     <div className="h-screen flex flex-col overflow-hidden">
