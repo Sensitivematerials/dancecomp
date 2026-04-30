@@ -32,7 +32,7 @@ function autoDetect(headers: string[]) {
   return map;
 }
 
-interface Props { onImport: (rows: any[]) => Promise<void>; }
+interface Props { onImport: (rows: any[]) => Promise<void>; onReset?: () => void; }
 const PREVIEW = 8;
 
 export default function ImportView({ onImport }: Props) {

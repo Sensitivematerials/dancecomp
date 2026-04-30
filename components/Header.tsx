@@ -7,10 +7,10 @@ interface Props {
   role: UserRole; userName: string;
   unread: number; chatOpen: boolean;
   onToggleChat: () => void; onFullscreen: () => void;
-  onSignOut: () => void; activeEvent: Event | null;
-  onShowEvents: () => void;
+  onSignOut: () => void; onReset: () => void;
+  activeEvent: Event | null; onShowEvents: () => void;
 }
-export default function Header({ view, setView, role, userName, unread, chatOpen, onToggleChat, onFullscreen, onSignOut, activeEvent, onShowEvents }: Props) {
+export default function Header({ view, setView, role, userName, unread, chatOpen, onToggleChat, onFullscreen, onSignOut, onReset, activeEvent, onShowEvents }: Props) {
   const tabs = [
     ...(role !== "backstage" ? [{ key: "emcee" as ViewTab, label: "🎙 Emcee" }] : []),
     ...(role !== "emcee" ? [{ key: "backstage" as ViewTab, label: "🎭 Backstage" }] : []),
@@ -38,13 +38,14 @@ export default function Header({ view, setView, role, userName, unread, chatOpen
           ))}
         </div>
         {role !== "backstage" && (
-          <button onClick={onFullscreen} className="h-[34px] w-[34px] rounded-[8px] border flex items-center justify-center text-gray-500 hover:text-white transition-all" style={{ borderColor: "var(--border)" }}>⛶</button>
+          <button onClick={onFullscreen} className="h-[34px] w-[34px] rounded-[8px] border flex items-center justify-center text-gray-500 hover:text-white transition-all" style={{ borderColor: "var(--border)" }} title="Full-screen mode">⛶</button>
         )}
         <button onClick={onToggleChat}
           className={`relative h-[34px] w-[34px] rounded-[8px] border flex items-center justify-center text-[16px] transition-all ${unread > 0 ? "border-pink-500/40 text-pink-400" : "border-[var(--border)] text-gray-500 hover:text-gray-300"}`}>
           💬
           {unread > 0 && <span className="absolute top-[4px] right-[4px] w-2 h-2 bg-pink-500 rounded-full border-2" style={{ borderColor: "var(--surface)" }} />}
         </button>
+        <button onClick={onReset} className="hidden sm:flex h-[34px] w-[34px] rounded-[8px] border items-center justify-center text-gray-600 hover:text-red-400 hover:border-red-400/30 transition-all" style={{ borderColor: "var(--border)" }} title="Reset competition">🗑</button>
         <span className="hidden sm:block font-mono text-[11px] text-gray-600 pl-1">{userName}</span>
         <button onClick={onSignOut} className="h-[34px] px-3 rounded-[8px] border text-[11px] font-mono text-gray-600 hover:text-white transition-all" style={{ borderColor: "var(--border)" }}>Leave</button>
       </div>
