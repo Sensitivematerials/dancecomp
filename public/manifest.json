@@ -1,0 +1,45 @@
+{
+  "name": "DanceComp Cue Board",
+  "short_name": "CueBoard",
+  "description": "Live competition management for emcees and backstage managers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090c",
+  "theme_color": "#09090c",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Emcee View",
+      "url": "/?view=emcee",
+      "description": "Open the live emcee board"
+    },
+    {
+      "name": "Backstage View", 
+      "url": "/?view=backstage",
+      "description": "Open the backstage manager"
+    }
+  ]
+}
