@@ -1,48 +1,35 @@
 "use client";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
+import { useState, useEffect } from "react";
 
 export type UserRole = "emcee" | "backstage" | null;
 
+export interface SessionUser {
+  name: string;
+  role: "emcee" | "backstage";
+}
+
 export function useAuth() {
-  const [user,    setUser]    = useState<User | null>(null);
-  const [role,    setRole]    = useState<UserRole>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setRole((session?.user?.user_metadata?.role as UserRole) ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setRole((session?.user?.user_metadata?.role as UserRole) ?? null);
-    });
-
-    return () => subscription.unsubscribe();
+    try {
+      const saved = sessionStorage.getItem("dancecomp_user");
+      if (saved) setUser(JSON.parse(saved));
+    } catch {}
+    setLoading(false);
   }, []);
 
-  async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return error;
+  function signIn(name: string, role: "emcee" | "backstage") {
+    const u = { name, role };
+    sessionStorage.setItem("dancecomp_user", JSON.stringify(u));
+    setUser(u);
   }
 
-  async function signUp(email: string, password: string, role: "emcee" | "backstage") {
-    const { error } = await supabase.auth.signUp({
-      email, password,
-      options: { data: { role } },
-    });
-    return error;
+  function signOut() {
+    sessionStorage.removeItem("dancecomp_user");
+    setUser(null);
   }
 
-  async function signOut() {
-    await supabase.auth.signOut();
-  }
-
-  return { user, role, loading, signIn, signUp, signOut };
+  return { user, role: user?.role ?? null, loading, signIn, signOut };
 }

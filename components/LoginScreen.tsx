@@ -1,117 +1,121 @@
 "use client";
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 
-export default function LoginScreen() {
-  const { signIn, signUp } = useAuth();
-  const [mode,     setMode]     = useState<"signin" | "signup">("signin");
-  const [email,    setEmail]    = useState("");
-  const [password, setPassword] = useState("");
-  const [role,     setRole]     = useState<"emcee" | "backstage">("backstage");
-  const [error,    setError]    = useState("");
-  const [loading,  setLoading]  = useState(false);
+interface Props {
+  onEnter: (name: string, role: "emcee" | "backstage") => void;
+}
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(""); setLoading(true);
+export default function LoginScreen({ onEnter }: Props) {
+  const [name, setName] = useState("");
+  const [role, setRole] = useState<"emcee" | "backstage" | null>(null);
+  const [error, setError] = useState("");
 
-    const err = mode === "signin"
-      ? await signIn(email, password)
-      : await signUp(email, password, role);
+  function handleEnter() {
+    if (!name.trim()) { setError("Enter your name to continue"); return; }
+    if (!role)         { setError("Pick a role to continue"); return; }
+    onEnter(name.trim(), role);
+  }
 
-    if (err) setError(err.message);
-    setLoading(false);
+  function handleKey(e: React.KeyboardEvent) {
+    if (e.key === "Enter") handleEnter();
   }
 
   return (
     <div className="h-screen flex flex-col items-center justify-center px-6"
       style={{ background: "var(--black)" }}>
-
-      {/* Logo */}
-      <div className="mb-10 text-center">
-        <div className="font-display text-[42px] tracking-[4px] mb-2">
+      <div className="mb-12 text-center">
+        <div className="font-display text-[48px] tracking-[5px] mb-2">
           Dance<span className="text-pink-500">Comp</span>
         </div>
-        <div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600">
-          Cue Board
-        </div>
+        <div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600">Cue Board</div>
       </div>
-
-      {/* Card */}
-      <div className="w-full max-w-sm rounded-[18px] border p-7"
+      <div className="w-full max-w-sm rounded-[20px] border p-8"
         style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-
-        {/* Mode toggle */}
-        <div className="flex rounded-[10px] p-1 gap-1 mb-6 border"
-          style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-          {(["signin", "signup"] as const).map(m => (
-            <button key={m}
-              className={`flex-1 h-9 rounded-[7px] text-[13px] font-medium transition-all
-                ${mode === m ? "text-white" : "text-gray-500"}`}
-              style={mode === m ? { background: "var(--border2)" } : {}}
-              onClick={() => setMode(m)}
-            >
-              {m === "signin" ? "Sign In" : "Create Account"}
-            </button>
-          ))}
+        <div className="mb-6">
+          <div className="font-mono text-[10px] tracking-[2px] uppercase text-gray-600 mb-2.5">Your Name</div>
+          <input autoFocus type="text" placeholder="e.g. Winston"
+            className="w-full h-[56px] rounded-[10px] border px-4 text-[17px] font-medium outline-none placeholder-gray-700 transition-colors"
+            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" }}
+            value={name}
+            onChange={e => { setName(e.target.value); setError(""); }}
+            onKeyDown={handleKey}
+          />
         </div>
+        <div className="mb-6">
+          <div className="font-mono text-[10px] tracking-[2px] uppercase text-gray-600 
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          {/* Role selector — only on signup */}
-          {mode === "signup" && (
-            <div className="flex gap-2 mb-1">
-              {(["emcee", "backstage"] as const).map(r => (
-                <button key={r} type="button"
-                  className={`flex-1 h-11 rounded-[8px] border text-[13px] font-semibold transition-all
-                    ${role === r
-                      ? r === "emcee"
-                        ? "border-blue-400/30 bg-blue-400/10 text-blue-400"
-                        : "border-emerald-400/25 bg-emerald-400/10 text-emerald-400"
-                      : "border-[var(--border2)] text-gray-500"
-                    }`}
-                  onClick={() => setRole(r)}
-                >
-                  {r === "emcee" ? "🎙 Emcee" : "🎭 Backstage"}
-                </button>
-              ))}
-            </div>
-          )}
+cat > components/LoginScreen.tsx << 'ENDOFFILE'
+"use client";
+import { useState } from "react";
 
-          <input
-            type="email" required placeholder="Email address"
-            className="h-[52px] rounded-[8px] border px-4 text-[15px] outline-none placeholder-gray-600"
-            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" }}
-            value={email} onChange={e => setEmail(e.target.value)}
-          />
-          <input
-            type="password" required placeholder="Password"
-            className="h-[52px] rounded-[8px] border px-4 text-[15px] outline-none placeholder-gray-600"
-            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" }}
-            value={password} onChange={e => setPassword(e.target.value)}
-          />
+interface Props {
+  onEnter: (name: string, role: "emcee" | "backstage") => void;
+}
 
-          {error && (
-            <div className="text-[13px] text-red-400 px-1">{error}</div>
-          )}
+export default function LoginScreen({ onEnter }: Props) {
+  const [name, setName] = useState("");
+  const [role, setRole] = useState<"emcee" | "backstage" | null>(null);
+  const [error, setError] = useState("");
 
-          <button type="submit" disabled={loading}
-            className="h-[52px] rounded-[8px] font-semibold text-[15px] mt-1 transition-all disabled:opacity-40"
-            style={{ background: "var(--pink)", color: "white" }}
-          >
-            {loading ? "Please wait…" : mode === "signin" ? "Sign In" : "Create Account"}
-          </button>
-        </form>
+  function handleEnter() {
+    if (!name.trim()) { setError("Enter your name to continue"); return; }
+    if (!role)         { setError("Pick a role to continue"); return; }
+    onEnter(name.trim(), role);
+  }
 
-        <p className="text-center text-[12px] text-gray-600 mt-5 leading-relaxed">
-          {mode === "signin"
-            ? "Don't have an account? "
-            : "Already have an account? "}
-          <button className="text-pink-400 underline"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>
-            {mode === "signin" ? "Create one" : "Sign in"}
-          </button>
-        </p>
+  function handleKey(e: React.KeyboardEvent) {
+    if (e.key === "Enter") handleEnter();
+  }
+
+  return (
+    <div className="h-screen flex flex-col items-center justify-center px-6"
+      style={{ background: "var(--black)" }}>
+      <div className="mb-12 text-center">
+        <div className="font-display text-[48px] tracking-[5px] mb-2">
+          Dance<span className="text-pink-500">Comp</span>
+        </div>
+        <div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600">Cue Board</div>
       </div>
+      <div className="w-full max-w-sm rounded-[20px] border p-8"
+        style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="mb-6">
+          <div className="font-mono text-[10px] tracking-[2px] uppercase text-gray-600 mb-2.5">Your Name</div>
+          <input autoFocus type="text" placeholder="e.g. Winston"
+            className="w-full h-[56px] rounded-[10px] border px-4 text-[17px] font-medium outline-none placeholder-gray-700 transition-colors"
+            style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" }}
+            value={name}
+            onChange={e => { setName(e.target.value); setError(""); }}
+            onKeyDown={handleKey}
+          />
+        </div>
+        <div className="mb-6">
+          <div className="font-mono text-[10px] tracking-[2px] uppercase text-gray-600 mb-2.5">I am the...</div>
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={() => { setRole("emcee"); setError(""); }}
+              className={`h-[80px] rounded-[12px] border flex flex-col items-center justify-center gap-2 transition-all
+                ${role === "emcee" ? "border-blue-400/40 bg-blue-400/10" : "border-[var(--border)] hover:border-[var(--border2)]"}`}>
+              <span className="text-[28px]">🎙</span>
+              <span className={`font-semibold text-[14px] ${role === "emcee" ? "text-blue-400" : "text-gray-400"}`}>Emcee / DJ</span>
+            </button>
+            <button onClick={() => { setRole("backstage"); setError(""); }}
+              className={`h-[80px] rounded-[12px] border flex flex-col items-center justify-center gap-2 transition-all
+                ${role === "backstage" ? "border-emerald-400/30 bg-emerald-400/10" : "border-[var(--border)] hover:border-[var(--border2)]"}`}>
+              <span className="text-[28px]">🎭</span>
+              <span className={`font-semibold text-[14px] ${role === "backstage" ? "text-emerald-400" : "text-gray-400"}`}>Backstage</span>
+            </button>
+          </div>
+        </div>
+        {error && <div className="text-[13px] text-red-400 mb-4 text-center">{error}</div>}
+        <button onClick={handleEnter}
+          className="w-full h-[54px] rounded-[10px] font-bold text-[16px] transition-all active:scale-[0.98]"
+          style={{
+            background: role === "emcee" ? "var(--blue)" : role === "backstage" ? "var(--green)" : "var(--border2)",
+            color: role ? "var(--black)" : "var(--dim)",
+          }}>
+          {role === "emcee" ? "🎙 Enter as Emcee" : role === "backstage" ? "🎭 Enter as Backstage" : "Enter"}
+        </button>
+      </div>
+      <div className="mt-6 font-mono text-[11px] text-gray-700 text-center">No password needed · Just your name and role</div>
     </div>
   );
 }
