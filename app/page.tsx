@@ -75,7 +75,7 @@ export default function Home() {
         <EventsModal
           events={events}
           activeEvent={activeEvent}
-          onSwitch={(e) => { switchEvent(e); setShowEvents(false); }}
+          onSwitch={(e: any) => { switchEvent(e); setShowEvents(false); }}
           onCreate={createEvent}
           onClose={() => setShowEvents(false)}
         />
