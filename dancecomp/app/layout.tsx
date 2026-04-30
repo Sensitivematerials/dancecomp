@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "CueBoard",
   },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
@@ -28,9 +31,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="CueBoard" />
-        <script src="/register-sw.js" async />
       </head>
-      <body className="h-screen overflow-hidden flex flex-col">{children}</body>
+      <body className="h-screen overflow-hidden flex flex-col">
+        {children}
+        <PWARegister />
+      </body>
     </html>
+  );
+}
+
+function PWARegister() {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/sw.js')
+                .then(function(reg) { console.log('SW registered'); })
+                .catch(function(err) { console.log('SW failed:', err); });
+            });
+          }
+        `,
+      }}
+    />
   );
 }
