@@ -22,9 +22,9 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
   const [showAdd, setShowAdd] = useState(false);
   const [newR, setNewR] = useState({ number: "", studio: "", title: "", division: "" });
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: routines.filter(r => !r.scratched).length };
+    const c: Record<string, number> = { all: routines.length };
     routines.forEach(r => {
-      if (r.scratched) { c["scratched"] = (c["scratched"] ?? 0) + 1; return; }
+      if (r.scratched) { c["scratched"] = (c["scratched"] ?? 0) + 1; }
       const s = getStatus(r); c[s] = (c[s] ?? 0) + 1;
     });
     return c;
@@ -32,7 +32,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
   const filtered = useMemo(() => {
     let list = filter === "scratched"
       ? routines.filter(r => r.scratched)
-      : routines.filter(r => !r.scratched);
+      : routines;
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(r => r.number.toLowerCase().includes(q) || r.studio.toLowerCase().includes(q) || r.title.toLowerCase().includes(q) || r.division.toLowerCase().includes(q));
