@@ -21,7 +21,7 @@ const FILTERS: { key: RoutineStatus | "all"; label: string }[] = [
 export default function BackstageView({
   routines, loading,
   checkIn, undoCheckIn, markReady, markNotReady,
-  setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine,
+  setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, scratchRoutine,
 }: Props) {
   const [search,  setSearch]  = useState("");
   const [filter,  setFilter]  = useState<RoutineStatus | "all">("all");
@@ -141,7 +141,8 @@ export default function BackstageView({
                 <Button variant="green" size="sm" onClick={() => markCompleted(r.id)}>✔ Done</Button>
                 <Button variant="red"   size="sm" onClick={() => removeFromStage(r.id)}>✕ Remove</Button>
               </>}
-              {r.completed && <Button variant="ghost" size="sm" onClick={() => checkIn(r.id)}>Re-Check In</Button>}
+              {r.completed {r.completed && <Button variant="ghost" size="sm" onClick={() => checkIn(r.id)}>Re-Check In</Button>}{r.completed && <Button variant="ghost" size="sm" onClick={() => checkIn(r.id)}>Re-Check In</Button>} <Button variant="ghost" size="sm" onClick={() => checkIn(r.id)}>Re-Check In</Button>}
+              {!r.completed && !r.on_stage && <Button variant="red" size="sm" onClick={() => scratchRoutine(r.id)}>✕ Scratch</Button>}
               <Button variant={r.has_prop ? "prop-on" : "prop-off"} size="sm" onClick={() => toggleProp(r.id)}>
                 {r.has_prop ? "🎬 Has Prop" : "🎬 No Prop"}
               </Button>
