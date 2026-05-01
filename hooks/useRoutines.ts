@@ -56,7 +56,7 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     if (error) console.error("Update failed:", error.message);
   }, []);
 
-  const checkIn         = useCallback((id: string) => update(id, { checked_in: true, ready: false, on_stage: false }), [update]);
+  const checkIn         = useCallback((id: string) => update(id, { checked_in: true, ready: false, on_stage: false, completed: false }), [update]);
   const undoCheckIn       = useCallback((id: string) => update(id, { checked_in: false, ready: false, on_stage: false }), [update]);
   const markReady       = useCallback((id: string) => update(id, { ready: true, checked_in: true, completed: false }), [update]);
   const unMarkReady     = useCallback((id: string) => update(id, { ready: false }), [update]);
