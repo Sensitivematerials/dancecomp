@@ -61,7 +61,7 @@ export default function Header({ view, setView, role, userName, unread, chatOpen
         </button>
         <div className="relative" ref={menuRef}>
           <button onClick={() => setMenuOpen(v => !v)}
-            className="h-[38px] w-[38px] rounded-[8px] border flex items-center justify-center text-gray-500 hover:text-white transition-all"
+            className="h-[44px] w-[44px] rounded-[10px] border flex items-center justify-center text-gray-500 hover:text-white transition-all"
             style={{ borderColor: menuOpen ? "var(--border2)" : "var(--border)", background: menuOpen ? "var(--card2)" : "transparent" }}>
             <span className="text-[18px] leading-none">···</span>
           </button>

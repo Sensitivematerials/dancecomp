@@ -34,6 +34,7 @@ export default function ImportView({ onImport, onReset }: Props) {
   const [mapping,setMapping] = useState<Record<string,string>>({});
   const [fileName,setFileName] = useState("");
   const [dragOver,setDragOver] = useState(false);
+  const [mapOpen,setMapOpen] = useState(false);
   const [importing,setImporting] = useState(false);
   const [tab,setTab] = useState<"file"|"sheets">("file");
   const [sheetsUrl,setSheetsUrl] = useState("");
@@ -134,10 +135,18 @@ export default function ImportView({ onImport, onReset }: Props) {
         <span className="font-mono text-[12px] text-gray-500 whitespace-nowrap">{rawRows.length} rows</span>
         <Button variant="ghost" size="sm" onClick={reset}>✕ Clear</Button>
       </div>
-      <div className="mb-5">
-        <div className="text-[15px] font-semibold mb-1">Map Your Columns</div>
-        <div className="text-[13px] text-gray-500 mb-4">Match your file headers to each field. Required fields marked ✱</div>
-        <div className="grid grid-cols-2 gap-2.5">
+      <div className="mb-3">
+        <button onClick={() => setMapOpen(o => !o)}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-[10px] border transition-all"
+          style={{ background:"var(--card)", borderColor:"var(--border2)" }}>
+          <div className="flex items-center gap-2">
+            <span className="text-[15px] font-semibold">Map Your Columns</span>
+            {missing.length > 0 && <span className="font-mono text-[10px] text-red-400 border border-red-400/30 px-2 py-0.5 rounded-full">{missing.length} required</span>}
+            {missing.length === 0 && <span className="font-mono text-[10px] text-emerald-400 border border-emerald-400/30 px-2 py-0.5 rounded-full">✓ mapped</span>}
+          </div>
+          <span className="text-gray-500 text-[13px]">{mapOpen ? "▲" : "▼"}</span>
+        </button>
+        {mapOpen && <div className="mt-3 grid grid-cols-2 gap-2.5">
           {ALL.map(field => {
             const req = REQUIRED.includes(field);
             const isMapped = !!mapping[field];
@@ -158,7 +167,7 @@ export default function ImportView({ onImport, onReset }: Props) {
               </div>
             );
           })}
-        </div>
+        </div>}
       </div>
       <div className={`flex items-center gap-2.5 rounded-[10px] border px-4 py-3 mb-4 text-[13px] font-medium
         ${valStatus==="ok"?"bg-emerald-400/10 border-emerald-400/25 text-emerald-400":valStatus==="warn"?"bg-amber-400/10 border-amber-400/25 text-amber-400":"bg-red-400/10 border-red-400/25 text-red-400"}`}>
