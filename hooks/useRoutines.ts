@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase, DEFAULT_EVENT } from "@/lib/supabase";
 import { Routine } from "@/types";
 
-export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backstage" | null) {
+export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backstage" | "stage" | null) {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
