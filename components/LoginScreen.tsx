@@ -4,7 +4,7 @@ import { Event } from "@/hooks/useEvents";
 interface Props { events: Event[]; eventsLoading: boolean; onEnter: (name: string, role: "emcee" | "backstage" | "stage", event: Event) => void; onCreate: (name: string, date: string, location: string) => Promise<Event | null>; onDelete: (id: string) => Promise<void>; }
 export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, onDelete }: Props) {
   const [step, setStep] = useState<"identity" | "show">("identity");
-  const [name, setName] = useState(""); const [role, setRole] = useState<"emcee" | "backstage" | null>(null); const [error, setError] = useState("");
+  const [name, setName] = useState(""); const [role, setRole] = useState<"emcee" | "backstage" | "stage" | null>(null); const [error, setError] = useState("");
   const [creating, setCreating] = useState(false); const [showName, setShowName] = useState(""); const [showDate, setShowDate] = useState(""); const [showVenue, setShowVenue] = useState(""); const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState<string | null>(null); const [deletingId, setDeletingId] = useState<string | null>(null);
   function handleNext() { if (!name.trim()) { setError("Enter your name"); return; } if (!role) { setError("Pick a role"); return; } setError(""); setStep("show"); }
@@ -36,7 +36,7 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
               </div>
             </div>
             {error && <div className="text-[13px] text-red-400 mb-3 text-center">{error}</div>}
-            <button onClick={handleNext} className="w-full h-[52px] rounded-[10px] font-bold text-[15px] transition-all" style={{ background: role==="emcee" ? "#5b9fff" : role==="backstage" ? "#20d49c" : "var(--border2)", color: role ? "var(--black)" : "var(--dim)" }}>Next →</button>
+            <button onClick={handleNext} className="w-full h-[52px] rounded-[10px] font-bold text-[15px] transition-all" style={{ background: role==="emcee" ? "#5b9fff" : role==="backstage" ? "#20d49c" : role==="stage" ? "#a78bfa" : "var(--border2)", color: role ? "var(--black)" : "var(--dim)" }}>Next →</button>
           </div>
         )}
         {step === "show" && (
@@ -56,7 +56,7 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
                     </div>
                   ) : events.map(ev => (
                     <div key={ev.id} className="rounded-[14px] border overflow-hidden" style={{ background: "var(--card)", borderColor: confirmId===ev.id ? "rgba(255,82,88,0.5)" : "var(--border)" }}>
-                      {confirmId === ev.id && (
+                      {confirmId === ev.id && role !== "stage" && (
                         <div className="px-4 py-2.5 flex items-center justify-between gap-2" style={{ background: "rgba(255,82,88,0.12)", borderBottom: "1px solid rgba(255,82,88,0.25)" }}>
                           <span className="text-[13px] font-semibold text-red-400">Delete this show?</span>
                           <div className="flex gap-2">
@@ -82,11 +82,11 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
                           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                           <span className="font-mono text-[10px] text-emerald-400 mr-1">LIVE</span>
                         </div>
-                        <button onClick={() => setConfirmId(confirmId===ev.id ? null : ev.id)}
+                        {role !== "stage" && <button onClick={() => setConfirmId(confirmId===ev.id ? null : ev.id)}
                           className="w-9 h-9 rounded-[8px] border flex items-center justify-center flex-shrink-0 transition-all"
                           style={{ borderColor: confirmId===ev.id ? "rgba(255,82,88,0.5)" : "var(--border2)", background: confirmId===ev.id ? "rgba(255,82,88,0.12)" : "var(--surface)", color: confirmId===ev.id ? "#ff5258" : "var(--dim)", fontSize: 15 }}>
                           🗑
-                        </button>
+                        </button>}
                         <button onClick={() => onEnter(name, role!, ev)}
                           className="w-9 h-9 rounded-[8px] border flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-pink-400 transition-all"
                           style={{ borderColor: "var(--border2)", background: "var(--surface)" }}>
