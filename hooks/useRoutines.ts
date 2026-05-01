@@ -60,6 +60,11 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
   const undoCheckIn       = useCallback((id: string) => update(id, { checked_in: false, ready: false, on_stage: false }), [update]);
   const markReady       = useCallback((id: string) => update(id, { ready: true, checked_in: true, completed: false }), [update]);
   const unMarkReady     = useCallback((id: string) => update(id, { ready: false }), [update]);
+  const markNotReady    = unMarkReady;
+  const toggleProp      = useCallback((id: string, val: boolean) => update(id, { has_prop: val }), [update]);
+  const addRoutine      = useCallback(async (r: Partial<Routine>) => {
+    await supabase.from("routines").insert({ event_slug: eventSlug, number: String(r.number ?? ""), studio: String(r.studio ?? ""), title: String(r.title ?? ""), division: String(r.division ?? ""), dancers: "", age_group: "", music_file: "", notes: "", has_prop: false, checked_in: false, ready: false, on_stage: false, completed: false });
+  }, [eventSlug]);
   const setOnStage      = useCallback(async (id: string) => {
     await supabase.from("routines").update({ on_stage: false }).eq("event_slug", eventSlug).eq("on_stage", true);
     await update(id, { on_stage: true, ready: true, checked_in: true, completed: false });
@@ -83,5 +88,5 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     }
   }, [eventSlug]);
 
-  return { routines, loading, error, checkIn, undoCheckIn, markReady, unMarkReady, setOnStage, removeFromStage, markCompleted, clearAll, bulkInsert };
+  return { routines, loading, error, checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
 }
