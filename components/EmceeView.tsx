@@ -19,13 +19,24 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
       .sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }))
   , [routines]);
 
+  const scratchedInQueue = useMemo(() =>
+    routines
+      .filter(r => r.scratched && r.checked_in && !r.on_stage && !r.completed)
+      .sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }))
+  , [routines]);
+
+  const fullQueue = useMemo(() => {
+    const combined = [...readyQueue, ...scratchedInQueue];
+    return combined.sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }));
+  }, [readyQueue, scratchedInQueue]);
+
   const checkedIn = useMemo(() =>
     routines
       .filter(r => r.checked_in && !r.completed)
       .sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }))
   , [routines]);
 
-  const [upNext, ...rest] = readyQueue;
+  const [upNext, ...rest] = fullQueue;
 
   return (
     <div>
@@ -50,9 +61,9 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
       </div>
 
       {/* ── READY QUEUE ── */}
-      <SectionLabel>Ready to Go{readyQueue.length > 0 ? ` · ${readyQueue.length}` : ""}</SectionLabel>
+      <SectionLabel>Ready to Go{fullQueue.length > 0 ? ` · ${fullQueue.length}` : ""}</SectionLabel>
 
-      {readyQueue.length === 0 ? (
+      {fullQueue.length === 0 ? (
         <EmptyState>No routines ready yet</EmptyState>
       ) : (
         <>
@@ -69,30 +80,48 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
           )}
 
           {/* Up next — prominent */}
-          <div className={`flex items-center gap-4 rounded-[14px] p-5 mb-2.5 border ${upNext.has_prop ? "border-orange-400/35" : ""}`}
-            style={{ background: "rgba(32,212,156,0.09)", borderColor: upNext.has_prop ? undefined : "rgba(32,212,156,0.26)" }}>
-            <div className="font-display text-[52px] leading-none text-emerald-400 min-w-[68px]">{upNext.number}</div>
+          {upNext.scratched && (
+            <div className="flex items-center gap-3 rounded-[10px] px-4 py-3 mb-2.5 border"
+              style={{ background: "rgba(255,82,88,0.08)", borderColor: "rgba(255,82,88,0.30)" }}>
+              <span className="text-[18px]">⚠️</span>
+              <div className="text-[13px] font-semibold text-red-400">Next routine is SCRATCHED — announce to crowd then move on</div>
+            </div>
+          )}
+          <div className={`flex items-center gap-4 rounded-[14px] p-5 mb-2.5 border`}
+            style={{
+              background: upNext.scratched ? "rgba(255,82,88,0.07)" : "rgba(32,212,156,0.09)",
+              borderColor: upNext.scratched ? "rgba(255,82,88,0.30)" : upNext.has_prop ? "rgba(255,140,0,0.35)" : "rgba(32,212,156,0.26)"
+            }}>
+            <div className={`font-display text-[52px] leading-none min-w-[68px] ${upNext.scratched ? "text-red-400 line-through" : "text-emerald-400"}`}>{upNext.number}</div>
             <div className="flex-1">
-              <div className="text-[17px] font-semibold">{upNext.title}</div>
+              <div className={`text-[17px] font-semibold ${upNext.scratched ? "line-through text-gray-400" : ""}`}>{upNext.title}</div>
               <div className="text-[13px] text-gray-400 mt-1">{upNext.studio} · {upNext.division}</div>
-              {upNext.has_prop && (
+              {upNext.scratched && <div className="font-mono text-[10px] text-red-400 mt-1 tracking-wider">SCRATCHED</div>}
+              {upNext.has_prop && !upNext.scratched && (
                 <span className="inline-flex items-center gap-1 mt-1.5 text-orange-400 font-mono text-[10px] px-2.5 py-1 rounded-full border"
                   style={{ background: "rgba(255,140,0,0.12)", borderColor: "rgba(255,140,0,0.35)" }}>
                   🎬 Prop
                 </span>
               )}
             </div>
-            <Button variant="stage" size="sm" onClick={() => setOnStage(upNext.id)}>🎭 Put On Stage</Button>
+            <Button variant="stage" size="sm" onClick={() => setOnStage(upNext.id)}>
+              {upNext.scratched ? "📢 Announce" : "🎭 Put On Stage"}
+            </Button>
           </div>
 
           {/* Rest of queue */}
           {rest.map(r => (
-            <div key={r.id} className={`flex items-center gap-3 rounded-[10px] px-4 py-3 mb-2 border ${r.has_prop ? "border-l-[3px] border-l-orange-400" : ""}`}
-              style={{ background: "var(--card)", borderColor: r.has_prop ? undefined : "var(--border)" }}>
-              <div className="font-display text-[28px] leading-none text-emerald-400 min-w-[46px]">{r.number}</div>
-              <div className="flex-1 text-[14px] font-semibold">{r.title}</div>
-              {r.has_prop && <span className="text-[14px]">🎬</span>}
-              <Button variant="stage" size="sm" onClick={() => setOnStage(r.id)}>🎭 Put On Stage</Button>
+            <div key={r.id} className={`flex items-center gap-3 rounded-[10px] px-4 py-3 mb-2 border`}
+              style={{ background: r.scratched ? "rgba(255,82,88,0.05)" : "var(--card)", borderColor: r.scratched ? "rgba(255,82,88,0.20)" : "var(--border)" }}>
+              <div className={`font-display text-[28px] leading-none min-w-[46px] ${r.scratched ? "text-red-400 line-through" : "text-emerald-400"}`}>{r.number}</div>
+              <div className="flex-1">
+                <div className={`text-[14px] font-semibold ${r.scratched ? "line-through text-gray-500" : ""}`}>{r.title}</div>
+                {r.scratched && <div className="font-mono text-[9px] text-red-400 tracking-wider">SCRATCHED</div>}
+              </div>
+              {r.has_prop && !r.scratched && <span className="text-[14px]">🎬</span>}
+              <Button variant="stage" size="sm" onClick={() => setOnStage(r.id)}>
+                {r.scratched ? "📢" : "🎭 Put On Stage"}
+              </Button>
             </div>
           ))}
         </>
