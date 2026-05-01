@@ -19,23 +19,58 @@ export default function Home() {
   const { events, loading: eventsLoading, createEvent, deleteEvent } = useEvents();
   const [activeEvent, setActiveEvent] = useState<Event | null>(null);
   const eventSlug = activeEvent?.slug ?? "demo-event";
-  const routines = useRoutines(eventSlug);
+  const routines = useRoutines(eventSlug, role);
   const chat = useChat(eventSlug);
   const [view, setView] = useState<ViewTab>("emcee");
   const [fullscreen, setFullscreen] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  function handleEnter(name: string, r: "emcee" | "backstage", ev: Event) { signIn(name, r); setActiveEvent(ev); setView(r === "emcee" ? "emcee" : "backstage"); }
-  async function handleReset() { await routines.clearAll(); await chat.clearMessages(); if (activeEvent) await deleteEvent(activeEvent.id); setActiveEvent(null); signOut(); }
+
+  function handleEnter(name: string, r: "emcee" | "backstage" | "stage", ev: Event) {
+    signIn(name, r);
+    setActiveEvent(ev);
+    setView(r === "emcee" ? "emcee" : "backstage");
+  }
+
+  async function handleReset() {
+    await routines.clearAll();
+    await chat.clearMessages();
+    if (activeEvent) await deleteEvent(activeEvent.id);
+    setActiveEvent(null);
+    signOut();
+  }
+
   if (authLoading) return (
-    <div className="h-screen flex items-center justify-center" style={{ background: "var(--black)" }}>
-      <div className="text-center"><div className="font-display text-[36px] tracking-[4px] mb-3">Dance<span className="text-pink-500">Comp</span></div><div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600">Loading...</div></div>
+    <div className="h-screen flex items-center justify-center" style={{ background:"var(--black)" }}>
+      <div className="text-center">
+        <div className="font-display text-[36px] tracking-[4px] mb-3">Dance<span className="text-pink-500">Comp</span></div>
+        <div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600">Loading...</div>
+      </div>
     </div>
   );
-  if (!user || !activeEvent) return <LoginScreen events={events} eventsLoading={eventsLoading} onEnter={handleEnter} onCreate={createEvent} onDelete={deleteEvent} />;
-  if (fullscreen) return <FullscreenMode routines={routines.routines} onExit={() => setFullscreen(false)} onMarkCompleted={routines.markCompleted} onSetOnStage={routines.setOnStage} onRemoveFromStage={routines.removeFromStage} />;
+
+  if (!user || !activeEvent) return (
+    <LoginScreen events={events} eventsLoading={eventsLoading} onEnter={handleEnter} onCreate={createEvent} onDelete={deleteEvent} />
+  );
+
+  // Stage Manager — clean read-only view, no header, no controls
+  if (role === "stage") return (
+    <StageView routines={routines.routines} eventName={activeEvent?.name} onLeave={() => { signOut(); setActiveEvent(null); }} />
+  );
+
+  if (fullscreen) return (
+    <FullscreenMode routines={routines.routines} onExit={() => setFullscreen(false)} onMarkCompleted={routines.markCompleted} onSetOnStage={routines.setOnStage} onRemoveFromStage={routines.removeFromStage} />
+  );
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <Header view={view} setView={setView} role={role} userName={user.name} unread={chat.unread} chatOpen={chat.open} onToggleChat={chat.open ? chat.closeChat : chat.openChat} onFullscreen={() => setFullscreen(true)} onSignOut={() => { signOut(); setActiveEvent(null); }} onReset={() => setShowReset(true)} activeEvent={activeEvent} onShowEvents={() => setActiveEvent(null)} />
+      <Header view={view} setView={setView} role={role} userName={user.name}
+        unread={chat.unread} chatOpen={chat.open}
+        onToggleChat={chat.open ? chat.closeChat : chat.openChat}
+        onFullscreen={() => setFullscreen(true)}
+        onSignOut={() => { signOut(); setActiveEvent(null); }}
+        onReset={() => setShowReset(true)}
+        activeEvent={activeEvent}
+        onShowEvents={() => setActiveEvent(null)} />
       <div className="flex flex-1 overflow-hidden relative">
         <main className="flex-1 overflow-y-auto p-4 md:p-7 transition-all duration-300" style={{ marginRight: chat.open ? "320px" : "0" }}>
           <div className="max-w-2xl mx-auto w-full">

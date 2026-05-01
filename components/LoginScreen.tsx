@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Event } from "@/hooks/useEvents";
-interface Props { events: Event[]; eventsLoading: boolean; onEnter: (name: string, role: "emcee" | "backstage", event: Event) => void; onCreate: (name: string, date: string, location: string) => Promise<Event | null>; onDelete: (id: string) => Promise<void>; }
+interface Props { events: Event[]; eventsLoading: boolean; onEnter: (name: string, role: "emcee" | "backstage" | "stage", event: Event) => void; onCreate: (name: string, date: string, location: string) => Promise<Event | null>; onDelete: (id: string) => Promise<void>; }
 export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, onDelete }: Props) {
   const [step, setStep] = useState<"identity" | "show">("identity");
   const [name, setName] = useState(""); const [role, setRole] = useState<"emcee" | "backstage" | null>(null); const [error, setError] = useState("");
@@ -27,7 +27,7 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
             <div className="mb-5">
               <div className="font-mono text-[10px] tracking-[2px] uppercase text-gray-600 mb-2.5">I am the...</div>
               <div className="grid grid-cols-2 gap-3">
-                {([["emcee","🎙","Emcee / DJ","#5b9fff","rgba(91,159,255,0.10)","rgba(91,159,255,0.30)"],["backstage","🎭","Backstage","#20d49c","rgba(32,212,156,0.09)","rgba(32,212,156,0.26)"],["stage","👁","Stage Manager","#a78bfa","rgba(167,139,250,0.09)","rgba(167,139,250,0.26)"]] as const).map(([r,icon,label,color,bg,border]) => (
+                {([["emcee","🎙","Emcee / DJ","#5b9fff","rgba(91,159,255,0.10)","rgba(91,159,255,0.30)"],["backstage","🎭","Backstage","#20d49c","rgba(32,212,156,0.09)","rgba(32,212,156,0.26)"],["stage","👁","Stage Manager","#a78bfa","rgba(167,139,250,0.09)","rgba(167,139,250,0.26)"],["stage","👁","Stage Manager","#a78bfa","rgba(167,139,250,0.09)","rgba(167,139,250,0.26)"]] as const).map(([r,icon,label,color,bg,border]) => (
                   <button key={r} onClick={() => { setRole(r as any); setError(""); }} className="h-[78px] rounded-[12px] border flex flex-col items-center justify-center gap-2 transition-all" style={{ borderColor: role===r ? border : "var(--border)", background: role===r ? bg : "transparent" }}>
                     <span className="text-[26px]">{icon}</span>
                     <span className="text-[13px] font-semibold" style={{ color: role===r ? color : "var(--muted)" }}>{label}</span>
