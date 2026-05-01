@@ -34,7 +34,7 @@ export default function Header({ view, setView, role, userName, unread, chatOpen
     );
   }
   return (
-    <header className="flex items-center justify-between px-3 h-[56px] flex-shrink-0 border-b z-50 gap-2" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+    <header className="flex items-center justify-between px-4 pr-5 h-[56px] flex-shrink-0 border-b z-50 gap-2" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
       <button onClick={onShowEvents} className="flex items-center gap-2 min-w-0 flex-shrink-0">
         <div className="font-display text-[20px] tracking-[2px] whitespace-nowrap">Dance<span className="text-pink-500">Comp</span></div>
         {activeEvent && (
