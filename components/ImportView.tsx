@@ -202,7 +202,7 @@ export default function ImportView({ onImport, onReset }: Props) {
           )}
         </div>
       </div>
-      <div className="flex gap-2.5">
+      <div className="flex gap-2.5 pb-24">
         <Button variant="green" fullWidth disabled={missing.length>0||valid.length===0||importing} onClick={handleImport}>
           {importing ? "Importing…" : `✓ Import ${valid.length} Routine${valid.length!==1?"s":""}`}
         </Button>
