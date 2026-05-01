@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-export type UserRole = "emcee" | "backstage" | null;
+export type UserRole = "emcee" | "backstage" | "stage" | null;
 
 export interface SessionUser {
   name: string;
