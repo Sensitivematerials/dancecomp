@@ -88,5 +88,7 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     }
   }, [eventSlug]);
 
-  return { routines, loading, error, checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
+  const scratchRoutine  = (id: string) => update(id, { scratched: true, ready: false, on_stage: false, checked_in: false });
+  const unScratch       = (id: string) => update(id, { scratched: false });
+  return { routines, loading, error, checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, scratchRoutine, unScratch, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
 }
