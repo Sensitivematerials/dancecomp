@@ -7,7 +7,7 @@ import EmptyState   from "./ui/EmptyState";
 import StatusBadge  from "./ui/StatusBadge";
 import Button        from "./ui/Button";
 type Props = ReturnType<typeof useRoutines>;
-const FILTERS: { key: RoutineStatus | "all"; label: string }[] = [
+const FILTERS: { key: RoutineStatus | "all" | "scratched"; label: string }[] = [
   { key: "all", label: "All" }, { key: "stage", label: "On Stage" },
   { key: "ready", label: "Ready" }, { key: "checked", label: "Checked In" },
   { key: "not-here", label: "Not Here" }, { key: "completed", label: "Done" },
@@ -19,11 +19,11 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
   const [newR, setNewR] = useState({ number: "", studio: "", title: "", division: "" });
   const counts = useMemo(() => {
     const c: Record<string,number> = { all: routines.length };
-    routines.forEach(r => { const s = getStatus(r); c[s] = (c[s] ?? 0) + 1; });
+    routines.forEach(r => { const s = getStatus(r); c[s] = (c[s] ?? 0) + 1; if (r.scratched) c["scratched"] = (c["scratched"] ?? 0) + 1; });
     return c;
   }, [routines]);
   const filtered = useMemo(() => {
-    let list = routines.filter(r => !r.scratched);
+    let list = filter === "scratched" ? routines.filter(r => r.scratched) : routines.filter(r => !r.scratched);
     if (search) { const q = search.toLowerCase(); list = list.filter(r => r.number.toLowerCase().includes(q) || r.studio.toLowerCase().includes(q) || r.title.toLowerCase().includes(q) || r.division.toLowerCase().includes(q)); }
     if (filter !== "all") list = list.filter(r => getStatus(r) === filter);
     return list;
