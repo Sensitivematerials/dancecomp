@@ -15,6 +15,7 @@ export interface Routine {
   music_file: string | null;
   notes: string | null;
   has_prop: boolean;
+  scratched?: boolean;
   created_at: string;
 }
 

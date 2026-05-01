@@ -8,6 +8,7 @@ import ChatDrawer from "@/components/ChatDrawer";
 import LoginScreen from "@/components/LoginScreen";
 import FullscreenMode from "@/components/FullscreenMode";
 import ResetModal from "@/components/ResetModal";
+import StageView from "@/components/StageView";
 import { useRoutines } from "@/hooks/useRoutines";
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";

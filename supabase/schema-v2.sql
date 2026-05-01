@@ -27,3 +27,5 @@ create policy "Public access to events"
 -- Enable auth in Supabase
 -- Go to: Authentication → Providers → Email → Enable
 -- (This is done in the Supabase dashboard, not SQL)
+-- Add scratched column
+ALTER TABLE routines ADD COLUMN IF NOT EXISTS scratched boolean DEFAULT false;

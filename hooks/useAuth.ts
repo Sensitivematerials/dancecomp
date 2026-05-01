@@ -5,7 +5,7 @@ export type UserRole = "emcee" | "backstage" | null;
 
 export interface SessionUser {
   name: string;
-  role: "emcee" | "backstage";
+  role: "emcee" | "backstage" | "stage";
 }
 
 export function useAuth() {
@@ -20,7 +20,7 @@ export function useAuth() {
     setLoading(false);
   }, []);
 
-  function signIn(name: string, role: "emcee" | "backstage") {
+  function signIn(name: string, role: "emcee" | "backstage" | "stage") {
     const u = { name, role };
     sessionStorage.setItem("dancecomp_user", JSON.stringify(u));
     setUser(u);
