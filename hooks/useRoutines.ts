@@ -96,8 +96,22 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     await supabase.from("routines").insert({ event_slug: eventSlug, number: String(r.number ?? ""), studio: String(r.studio ?? ""), title: String(r.title ?? ""), division: String(r.division ?? ""), dancers: "", age_group: "", music_file: "", notes: "", has_prop: false, checked_in: false, ready: false, on_stage: false, completed: false });
   }, [eventSlug]);
   const setOnStage      = useCallback(async (id: string) => {
-    await supabase.from("routines").update({ on_stage: false }).eq("event_slug", eventSlug).eq("on_stage", true);
-    await update(id, { on_stage: true, ready: true, checked_in: true, completed: false });
+    // First clear any existing on_stage routine
+    const { error: clearError } = await supabase.from("routines").update({ on_stage: false }).eq("event_slug", eventSlug).eq("on_stage", true);
+    if (clearError) { console.error("Could not clear on stage:", clearError.message); return; }
+    // Now set this one on stage — unique index will reject if race condition occurs
+    const { error: stageError } = await supabase.from("routines").update({ on_stage: true, ready: true, checked_in: true, completed: false }).eq("id", id);
+    if (stageError) {
+      // Race condition — another routine just went on stage, refetch and ignore
+      console.warn("Race condition on setOnStage, ignoring:", stageError.message);
+      const { data } = await supabase.from("routines").select("*").eq("event_slug", eventSlug).order("sort_order", { ascending: true, nullsFirst: false });
+      if (data) { setRoutines(data); prevRoutines.current = data; }
+      return;
+    }
+    // Optimistic update local state
+    setRoutines(prev => prev.map(r => r.id === id ? { ...r, on_stage: true, ready: true, checked_in: true, completed: false } : { ...r, on_stage: false }));
+    prevRoutines.current = prevRoutines.current.map(r => r.id === id ? { ...r, on_stage: true, ready: true, checked_in: true, completed: false } : { ...r, on_stage: false });
+    // Stamp show start time if not already set
     const { data: ev } = await supabase.from("events").select("show_started_at").eq("slug", eventSlug).single();
     if (ev && !ev.show_started_at) {
       await supabase.from("events").update({ show_started_at: new Date().toISOString() }).eq("slug", eventSlug);
