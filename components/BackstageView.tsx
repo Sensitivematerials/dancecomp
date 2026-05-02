@@ -16,7 +16,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "completed", label: "Done" },
   { key: "scratched", label: "✕ Scratched" },
 ];
-export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, scratchRoutine, unScratch }: Props) {
+export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, scratchRoutine, unScratch, reorderRoutine }: Props) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [showAdd, setShowAdd] = useState(false);
@@ -86,6 +86,10 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
             className={`rounded-[14px] border mb-2.5 overflow-hidden ${s==="completed"||r.scratched?"opacity-50":""}`}
             style={{ background: r.scratched ? "rgba(255,82,88,0.05)" : s==="stage" ? "rgba(255,208,96,0.10)" : "var(--card)", borderColor: r.scratched ? "rgba(255,82,88,0.25)" : "var(--border)" }}>
             <div className="flex items-center gap-3.5 px-4 pt-4 pb-3">
+              <div className="flex flex-col gap-0.5 mr-1">
+                <button onClick={() => reorderRoutine(r.id, "up")} className="w-6 h-6 rounded flex items-center justify-center text-gray-600 hover:text-white hover:bg-white/10 transition-all text-[10px]">▲</button>
+                <button onClick={() => reorderRoutine(r.id, "down")} className="w-6 h-6 rounded flex items-center justify-center text-gray-600 hover:text-white hover:bg-white/10 transition-all text-[10px]">▼</button>
+              </div>
               <div className={`font-display text-[40px] leading-none min-w-[56px] ${r.scratched ? "text-red-400 line-through" : { stage:"text-yellow-300", ready:"text-emerald-400", checked:"text-amber-400", "not-here":"text-gray-600", completed:"text-gray-600" }[s]}`}>{r.number}</div>
               <div className="flex-1 min-w-0">
                 <div className={`text-[16px] font-semibold truncate ${r.scratched ? "line-through text-gray-500" : ""}`}>{r.title}</div>

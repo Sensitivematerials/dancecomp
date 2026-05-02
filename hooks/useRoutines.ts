@@ -18,7 +18,7 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
   useEffect(() => {
     async function fetch() {
       setLoading(true);
-      const { data, error } = await supabase.from("routines").select("*").eq("event_slug", eventSlug).order("number", { ascending: true });
+      const { data, error } = await supabase.from("routines").select("*").eq("event_slug", eventSlug).order("sort_order", { ascending: true, nullsFirst: false });
       if (error) setError(error.message);
       else { setRoutines(data ?? []); prevRoutines.current = data ?? []; }
       setLoading(false);
@@ -32,7 +32,7 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
         { event: "*", schema: "public", table: "routines", filter: `event_slug=eq.${eventSlug}` },
         (payload) => {
           if (payload.eventType === "INSERT") {
-            setRoutines(prev => [...prev, payload.new as Routine].sort((a,b) => a.number.localeCompare(b.number, undefined, { numeric: true })));
+            setRoutines(prev => [...prev, payload.new as Routine].sort((a,b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999)));
             prevRoutines.current = [...prevRoutines.current, payload.new as Routine];
           }
           if (payload.eventType === "UPDATE") {
@@ -88,7 +88,25 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     }
   }, [eventSlug]);
 
+
+  const reorderRoutine = useCallback(async (id: string, direction: "up" | "down") => {
+    const idx = routines.findIndex(r => r.id === id);
+    if (idx === -1) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= routines.length) return;
+    const newRoutines = [...routines];
+    const aOrder = newRoutines[idx].sort_order ?? idx;
+    const bOrder = newRoutines[swapIdx].sort_order ?? swapIdx;
+    newRoutines[idx] = { ...newRoutines[idx], sort_order: bOrder };
+    newRoutines[swapIdx] = { ...newRoutines[swapIdx], sort_order: aOrder };
+    newRoutines.sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999));
+    setRoutines(newRoutines);
+    prevRoutines.current = newRoutines;
+    await supabase.from("routines").update({ sort_order: bOrder }).eq("id", newRoutines[swapIdx].id);
+    await supabase.from("routines").update({ sort_order: aOrder }).eq("id", newRoutines[idx].id);
+  }, [routines]);
+
   const scratchRoutine  = (id: string) => update(id, { scratched: true, on_stage: false });
   const unScratch       = (id: string) => update(id, { scratched: false });
-  return { routines, loading, error, checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, scratchRoutine, unScratch, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
+  return { routines, loading, error, checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
 }
