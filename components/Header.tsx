@@ -8,10 +8,10 @@ interface Props {
   role: UserRole; userName: string;
   unread: number; chatOpen: boolean;
   onToggleChat: () => void; onFullscreen: () => void;
-  onSignOut: () => void; onReset: () => void;
+  onSignOut: () => void; onReset: () => void; onReport: () => void;
   activeEvent: Event | null; onShowEvents: () => void;
 }
-export default function Header({ view, setView, role, userName, unread, chatOpen, onToggleChat, onFullscreen, onSignOut, onReset, activeEvent, onShowEvents }: Props) {
+export default function Header({ view, setView, role, userName, unread, chatOpen, onToggleChat, onFullscreen, onSignOut, onReset, onReport, activeEvent, onShowEvents }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -75,6 +75,7 @@ export default function Header({ view, setView, role, userName, unread, chatOpen
               <Item icon="🎪" label={activeEvent ? activeEvent.name : "Switch Event"} onClick={onShowEvents} />
               {role !== "backstage" && <Item icon="⛶" label="Full-Screen Mode" onClick={onFullscreen} />}
               <div className="border-t" style={{ borderColor: "var(--border)" }} />
+              <Item icon="📋" label="Show Report / PDF" onClick={onReport} />
               <Item icon="🗑" label="Reset Competition" onClick={onReset} danger />
               <Item icon="👋" label="Leave Session" onClick={onSignOut} />
             </div>
