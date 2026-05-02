@@ -98,9 +98,20 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
   const setOnStage      = useCallback(async (id: string) => {
     await supabase.from("routines").update({ on_stage: false }).eq("event_slug", eventSlug).eq("on_stage", true);
     await update(id, { on_stage: true, ready: true, checked_in: true, completed: false });
+    const { data: ev } = await supabase.from("events").select("show_started_at").eq("slug", eventSlug).single();
+    if (ev && !ev.show_started_at) {
+      await supabase.from("events").update({ show_started_at: new Date().toISOString() }).eq("slug", eventSlug);
+    }
   }, [update, eventSlug]);
   const removeFromStage = useCallback((id: string) => update(id, { on_stage: false, completed: false }), [update]);
-  const markCompleted   = useCallback((id: string) => update(id, { on_stage: false, completed: true, ready: false }), [update]);
+  const markCompleted   = useCallback(async (id: string) => {
+    await update(id, { on_stage: false, completed: true, ready: false });
+    const { data: remaining } = await supabase.from("routines")
+      .select("id").eq("event_slug", eventSlug).eq("completed", false).eq("scratched", false);
+    if (remaining && remaining.length === 0) {
+      await supabase.from("events").update({ show_ended_at: new Date().toISOString() }).eq("slug", eventSlug);
+    }
+  }, [update, eventSlug]);
   const clearAll        = useCallback(async () => {
     await supabase.from("routines").delete().eq("event_slug", eventSlug);
     setRoutines([]); prevRoutines.current = [];
