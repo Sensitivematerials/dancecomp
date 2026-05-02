@@ -16,11 +16,13 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "completed", label: "Done" },
   { key: "scratched", label: "✕ Scratched" },
 ];
-export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, scratchRoutine, unScratch, reorderRoutine }: Props) {
+export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, scratchRoutine, unScratch, reorderRoutine, updateNote }: Props) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [showAdd, setShowAdd] = useState(false);
   const [pickingId, setPickingId] = useState<string | null>(null);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [noteText, setNoteText] = useState("");
   const [newR, setNewR] = useState({ number: "", studio: "", title: "", division: "" });
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: routines.length };
@@ -100,6 +102,35 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
               {r.has_prop && !r.scratched && <span className="font-mono text-[9px] px-2.5 py-1 rounded-full border text-orange-400" style={{ background:"rgba(255,140,0,0.12)", borderColor:"rgba(255,140,0,0.35)" }}>🎬 Prop</span>}
               {!r.scratched && <StatusBadge status={s} />}
             </div>
+            {/* Notes section */}
+            {r.notes && editingNoteId !== r.id && (
+              <div className="mx-4 mb-2 flex items-start gap-2">
+                <span className="text-[13px] flex-shrink-0">📝</span>
+                <span className="text-[12px] text-yellow-300/80 flex-1">{r.notes}</span>
+                <button onClick={() => { setEditingNoteId(r.id); setNoteText(r.notes ?? ""); }} className="text-[10px] text-gray-500 hover:text-white flex-shrink-0">edit</button>
+              </div>
+            )}
+            {editingNoteId === r.id && (
+              <div className="mx-4 mb-2 flex gap-2">
+                <input
+                  autoFocus
+                  value={noteText}
+                  onChange={e => setNoteText(e.target.value)}
+                  placeholder="Add a note for the Emcee..."
+                  className="flex-1 h-[36px] rounded-[8px] border px-3 text-[13px] outline-none placeholder-gray-600"
+                  style={{ background: "var(--surface)", borderColor: "rgba(253,224,71,0.3)", color: "var(--text)" }}
+                  onKeyDown={async e => {
+                    if (e.key === "Enter") {
+                      await updateNote(r.id, noteText.trim() || null);
+                      setEditingNoteId(null);
+                    }
+                    if (e.key === "Escape") setEditingNoteId(null);
+                  }}
+                />
+                <button onClick={async () => { await updateNote(r.id, noteText.trim() || null); setEditingNoteId(null); }} className="px-3 h-[36px] rounded-[8px] text-[12px] font-bold text-black" style={{ background: "#fde047" }}>Save</button>
+                <button onClick={() => setEditingNoteId(null)} className="px-3 h-[36px] rounded-[8px] text-[12px] text-gray-500 border" style={{ borderColor: "var(--border2)" }}>✕</button>
+              </div>
+            )}
             {pickingId === r.id && (
               <div className="mx-4 mb-3 rounded-[10px] border overflow-hidden" style={{ borderColor: "rgba(167,139,250,0.3)", background: "rgba(167,139,250,0.06)" }}>
                 <div className="px-3 py-2 font-mono text-[10px] text-purple-400 tracking-widest uppercase border-b" style={{ borderColor: "rgba(167,139,250,0.2)" }}>Move after...</div>
@@ -135,6 +166,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
                   {r.completed && <Button variant="ghost" size="sm" onClick={() => checkIn(r.id)}>Re-Check In</Button>}
                   {!r.on_stage && <Button variant="red" size="sm" onClick={() => scratchRoutine(r.id)}>✕ Scratch</Button>}
                   <Button variant={r.has_prop ? "prop-on" : "prop-off"} size="sm" onClick={() => toggleProp(r.id)}>{r.has_prop ? "🎬 Has Prop" : "🎬 No Prop"}</Button>
+                  {!r.notes && <Button variant="ghost" size="sm" onClick={() => { setEditingNoteId(r.id); setNoteText(""); }}>📝 Add Note</Button>}
                 </>
               )}
             </div>
