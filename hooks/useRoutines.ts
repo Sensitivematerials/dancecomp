@@ -21,7 +21,13 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
         await supabase.from("routines").update(item.changes).eq("id", item.id);
       }
     }
-    function handleOnline() { setIsOnline(true); flushQueue(); }
+    async function handleOnline() {
+      setIsOnline(true);
+      await flushQueue();
+      // Refetch all routines to pick up changes made by other devices while offline
+      const { data } = await supabase.from("routines").select("*").eq("event_slug", eventSlug).order("sort_order", { ascending: true, nullsFirst: false });
+      if (data) { setRoutines(data); prevRoutines.current = data; }
+    }
     function handleOffline() { setIsOnline(false); }
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
