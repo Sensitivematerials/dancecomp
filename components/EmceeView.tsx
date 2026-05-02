@@ -103,6 +103,12 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
                   🎬 Prop
                 </span>
               )}
+              {upNext.notes && !upNext.scratched && (
+                <div className="mt-2 text-[12px] text-yellow-300 font-medium flex items-start gap-1.5">
+                  <span className="text-[14px] flex-shrink-0">📝</span>
+                  <span>{upNext.notes}</span>
+                </div>
+              )}
             </div>
             <Button variant="stage" size="sm" onClick={() => setOnStage(upNext.id)}>
               {upNext.scratched ? "📢 Announce" : "🎭 Put On Stage"}
@@ -117,6 +123,7 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
               <div className="flex-1">
                 <div className={`text-[14px] font-semibold ${r.scratched ? "line-through text-gray-500" : ""}`}>{r.title}</div>
                 {r.scratched && <div className="font-mono text-[9px] text-red-400 tracking-wider">SCRATCHED</div>}
+                {r.notes && !r.scratched && <div className="text-[11px] text-yellow-300/80 mt-0.5 truncate">📝 {r.notes}</div>}
               </div>
               {r.has_prop && !r.scratched && <span className="text-[14px]">🎬</span>}
               <Button variant="stage" size="sm" onClick={() => setOnStage(r.id)}>
