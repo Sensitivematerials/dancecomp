@@ -8,13 +8,15 @@ export default function ReportPage() {
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [loading, setLoading] = useState(true);
+  const [startedAt, setStartedAt] = useState<string | null>(null);
+  const [endedAt, setEndedAt] = useState<string | null>(null);
 
   useEffect(() => {
     const slug = new URLSearchParams(window.location.search).get("event");
     if (!slug) { setLoading(false); return; }
     async function load() {
       const { data: ev } = await supabase.from("events").select("*").eq("slug", slug).single();
-      if (ev) { setEventName(ev.name); setEventDate(ev.date ?? ""); }
+      if (ev) { setEventName(ev.name); setEventDate(ev.date ?? ""); setStartedAt(ev.show_started_at ?? null); setEndedAt(ev.show_ended_at ?? null); }
       const { data: rs } = await supabase.from("routines").select("*").eq("event_slug", slug).order("sort_order", { ascending: true, nullsFirst: false });
       setRoutines(rs ?? []);
       setLoading(false);
@@ -79,6 +81,31 @@ export default function ReportPage() {
         ))}
       </div>
 
+      {/* Show timing */}
+      {(startedAt || endedAt) && (
+        <div style={{ display: "flex", gap: 24, marginBottom: 28, padding: "16px 20px", background: "#f9fafb", borderRadius: 10, border: "1px solid #e5e7eb" }}>
+          {startedAt && (
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: 1, textTransform: "uppercase", color: "#888", fontFamily: "monospace", marginBottom: 4 }}>Show Started</div>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>{new Date(startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+            </div>
+          )}
+          {endedAt && (
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: 1, textTransform: "uppercase", color: "#888", fontFamily: "monospace", marginBottom: 4 }}>Show Ended</div>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>{new Date(endedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+            </div>
+          )}
+          {startedAt && endedAt && (
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: 1, textTransform: "uppercase", color: "#888", fontFamily: "monospace", marginBottom: 4 }}>Total Duration</div>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>
+                {(() => { const mins = Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000); return `${Math.floor(mins/60)}h ${mins%60}m`; })()}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {/* Routine table */}
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <thead>

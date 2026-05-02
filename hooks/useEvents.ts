@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-export interface Event { id: string; slug: string; name: string; date: string; location: string; created_at: string; }
+export interface Event { id: string; slug: string; name: string; date: string; location: string; created_at: string; show_started_at?: string | null; show_ended_at?: string | null; }
 export function useEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
