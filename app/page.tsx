@@ -20,6 +20,7 @@ export default function Home() {
   const [activeEvent, setActiveEvent] = useState<Event | null>(null);
   const eventSlug = activeEvent?.slug ?? "demo-event";
   const routines = useRoutines(eventSlug, role);
+  const isOnline = routines.isOnline;
   const chat = useChat(eventSlug);
   const [view, setView] = useState<ViewTab>("emcee");
   const [fullscreen, setFullscreen] = useState(false);
@@ -68,7 +69,7 @@ export default function Home() {
           ⚠ OFFLINE — changes will sync when reconnected
         </div>
       )}
-    <div className={!isOnline ? "pt-8" : ""} className="h-screen flex flex-col overflow-hidden">
+    <div className={`${!isOnline ? "pt-8" : ""} h-screen flex flex-col overflow-hidden`}>
       <Header view={view} setView={setView} role={role} userName={user.name}
         unread={chat.unread} chatOpen={chat.open}
         onToggleChat={chat.open ? chat.closeChat : chat.openChat}
