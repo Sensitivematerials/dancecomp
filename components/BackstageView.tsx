@@ -20,8 +20,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [showAdd, setShowAdd] = useState(false);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [reorderMode, setReorderMode] = useState(false);
   const [newR, setNewR] = useState({ number: "", studio: "", title: "", division: "" });
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: routines.length };
@@ -50,6 +49,9 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
     <div>
       <div className="flex gap-2.5 mb-3.5">
         <input className="flex-1 h-[52px] rounded-[8px] border px-4 text-[15px] outline-none bg-[var(--card)] placeholder-gray-600 focus:border-[var(--border2)]" style={{ borderColor:"var(--border)" }} placeholder="Search by number, studio, title…" value={search} onChange={e => setSearch(e.target.value)} />
+        <button onClick={() => setReorderMode(v => !v)} className="h-[52px] px-4 rounded-[8px] border font-bold text-[13px] transition-all flex-shrink-0" style={{ background: reorderMode ? "rgba(167,139,250,0.15)" : "var(--card)", borderColor: reorderMode ? "rgba(167,139,250,0.5)" : "var(--border)", color: reorderMode ? "#a78bfa" : "#666" }}>
+          {reorderMode ? "✓ Done" : "⇅ Reorder"}
+        </button>
         <Button variant="pink" size="sm" onClick={() => setShowAdd(v => !v)}>{showAdd ? "✕ Cancel" : "+ Add"}</Button>
       </div>
       {showAdd && (
@@ -85,21 +87,19 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
         const s = getStatus(r);
         return (
           <div key={r.id}
-            draggable
-            onDragStart={() => setDragId(r.id)}
-            onDragOver={e => { e.preventDefault(); setDragOverId(r.id); }}
-            onDragEnd={async () => {
-              if (dragId && dragOverId && dragId !== dragOverId) {
-                await reorderRoutine(dragId, dragOverId);
-              }
-              setDragId(null); setDragOverId(null);
-            }}
-            className={`rounded-[14px] border mb-2.5 overflow-hidden transition-all ${s==="completed"||r.scratched?"opacity-50":""} ${dragOverId===r.id && dragId!==r.id ? "border-pink-500 scale-[1.01]" : ""}`}
-            style={{ background: r.scratched ? "rgba(255,82,88,0.05)" : s==="stage" ? "rgba(255,208,96,0.10)" : "var(--card)", borderColor: dragOverId===r.id && dragId!==r.id ? "" : r.scratched ? "rgba(255,82,88,0.25)" : "var(--border)", cursor: dragId===r.id ? "grabbing" : "grab" }}>
+            className={`rounded-[14px] border mb-2.5 overflow-hidden transition-all ${s==="completed"||r.scratched?"opacity-50":""} ${reorderMode ? "border-purple-500/30" : ""}`}
+            style={{ background: r.scratched ? "rgba(255,82,88,0.05)" : s==="stage" ? "rgba(255,208,96,0.10)" : "var(--card)", borderColor: reorderMode ? "" : r.scratched ? "rgba(255,82,88,0.25)" : "var(--border)" }}>
             <div className="flex items-center gap-3.5 px-4 pt-4 pb-3">
-              <div className="flex flex-col gap-[3px] mr-1 px-1 py-2 opacity-30 hover:opacity-70 transition-opacity cursor-grab">
-                {[0,1,2,3,4,5].map(i => <div key={i} className="w-[14px] h-[2px] rounded-full bg-gray-400" />)}
-              </div>
+              {reorderMode ? (
+                <div className="flex flex-col gap-1 mr-1">
+                  <button onClick={() => reorderRoutine(r.id, routines[Math.max(0, routines.findIndex(x=>x.id===r.id)-1)].id)} className="w-7 h-7 rounded-[6px] flex items-center justify-center text-purple-400 hover:bg-purple-500/20 transition-all text-[13px] font-bold">▲</button>
+                  <button onClick={() => reorderRoutine(r.id, routines[Math.min(routines.length-1, routines.findIndex(x=>x.id===r.id)+1)].id)} className="w-7 h-7 rounded-[6px] flex items-center justify-center text-purple-400 hover:bg-purple-500/20 transition-all text-[13px] font-bold">▼</button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-[3px] mr-1 px-1 py-2 opacity-25">
+                  {[0,1,2,3,4,5].map(i => <div key={i} className="w-[14px] h-[2px] rounded-full bg-gray-400" />)}
+                </div>
+              )}
               <div className={`font-display text-[40px] leading-none min-w-[56px] ${r.scratched ? "text-red-400 line-through" : { stage:"text-yellow-300", ready:"text-emerald-400", checked:"text-amber-400", "not-here":"text-gray-600", completed:"text-gray-600" }[s]}`}>{r.number}</div>
               <div className="flex-1 min-w-0">
                 <div className={`text-[16px] font-semibold truncate ${r.scratched ? "line-through text-gray-500" : ""}`}>{r.title}</div>
