@@ -83,7 +83,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto w-full">
             {view === "emcee" && <EmceeView {...routines} onFullscreen={() => setFullscreen(true)} />}
             {view === "backstage" && <BackstageView {...routines} />}
-            {view === "import" && <ImportView onImport={async (rows) => { await routines.clearAll(); await routines.bulkInsert(rows as any); setView("backstage"); }} onReset={() => setShowReset(true)} onReport={() => window.open(`/report?event=${activeEvent?.slug}`, "_blank")} />}
+            {view === "import" && <ImportView onImport={async (rows) => { await routines.clearAll(); await routines.bulkInsert(rows as any); setView("backstage"); }} onReset={() => setShowReset(true)} />}
           </div>
         </main>
         <ChatDrawer chat={chat} />
