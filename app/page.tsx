@@ -62,7 +62,13 @@ export default function Home() {
   );
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div>
+      {!isOnline && (
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-2 py-2 font-mono text-[12px] font-bold text-black" style={{ background: "#f59e0b" }}>
+          ⚠ OFFLINE — changes will sync when reconnected
+        </div>
+      )}
+    <div className={!isOnline ? "pt-8" : ""} className="h-screen flex flex-col overflow-hidden">
       <Header view={view} setView={setView} role={role} userName={user.name}
         unread={chat.unread} chatOpen={chat.open}
         onToggleChat={chat.open ? chat.closeChat : chat.openChat}
@@ -83,5 +89,6 @@ export default function Home() {
       </div>
       {showReset && <ResetModal onConfirm={handleReset} onClose={() => setShowReset(false)} eventName={activeEvent?.name} />}
     </div>
+  </div>
   );
 }

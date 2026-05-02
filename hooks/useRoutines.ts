@@ -8,6 +8,26 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const prevRoutines = useRef<Routine[]>([]);
+  const [isOnline, setIsOnline] = useState(true);
+  const offlineQueue = useRef<Array<{ id: string; changes: Record<string, unknown> }>>([]);
+
+  // Track online/offline status and flush queue when back online
+  useEffect(() => {
+    async function flushQueue() {
+      if (offlineQueue.current.length === 0) return;
+      const q = [...offlineQueue.current];
+      offlineQueue.current = [];
+      for (const item of q) {
+        await supabase.from("routines").update(item.changes).eq("id", item.id);
+      }
+    }
+    function handleOnline() { setIsOnline(true); flushQueue(); }
+    function handleOffline() { setIsOnline(false); }
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    setIsOnline(navigator.onLine);
+    return () => { window.removeEventListener("online", handleOnline); window.removeEventListener("offline", handleOffline); };
+  }, []);
 
   function vibrateReady() {
     if (typeof window !== "undefined" && "vibrate" in navigator) {
@@ -104,5 +124,5 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
 
   const scratchRoutine  = (id: string) => update(id, { scratched: true, on_stage: false });
   const unScratch       = (id: string) => update(id, { scratched: false });
-  return { routines, loading, error, checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
+  return { routines, loading, error, isOnline, checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
 }
