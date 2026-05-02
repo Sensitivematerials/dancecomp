@@ -72,8 +72,18 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
   }, [eventSlug, role]);
 
   const update = useCallback(async (id: string, patch: Partial<Routine>) => {
+    // Optimistic update — update local state immediately regardless of network
+    setRoutines(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r));
+    prevRoutines.current = prevRoutines.current.map(r => r.id === id ? { ...r, ...patch } : r);
+    if (!navigator.onLine) {
+      offlineQueue.current.push({ id, changes: patch as Record<string, unknown> });
+      return;
+    }
     const { error } = await supabase.from("routines").update(patch).eq("id", id);
-    if (error) console.error("Update failed:", error.message);
+    if (error) {
+      offlineQueue.current.push({ id, changes: patch as Record<string, unknown> });
+      console.error("Update failed, queued:", error.message);
+    }
   }, []);
 
   const checkIn         = useCallback((id: string) => update(id, { checked_in: true, ready: false, on_stage: false, completed: false }), [update]);
