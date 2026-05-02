@@ -14,8 +14,8 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-5 py-10" style={{ background: "var(--black)" }}>
       <div className="mb-10 text-center">
-        <div className="font-display text-[48px] tracking-[5px] mb-1">Dance<span className="text-pink-500">Comp</span></div>
-        <div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600">Cue Board</div>
+        <div className="font-display text-[48px] tracking-[5px] mb-1">NextTo<span className="text-pink-500">Stage</span></div>
+        <div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600">Live Cue Board</div>
       </div>
       <div className="w-full max-w-sm">
         {step === "identity" && (

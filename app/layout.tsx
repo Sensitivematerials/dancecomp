@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DanceComp Cue Board",
+  title: "NextToStage — Live Cue Board",
   description: "Live competition management for emcees and backstage managers",
   manifest: "/manifest.json",
   appleWebApp: {

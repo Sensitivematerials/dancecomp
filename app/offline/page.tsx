@@ -5,7 +5,7 @@ export default function Offline() {
       style={{ background: "var(--black)" }}>
       <div className="text-5xl mb-6">📡</div>
       <h1 className="font-display text-4xl tracking-widest mb-3">
-        Dance<span className="text-pink-500">Comp</span>
+        NextTo<span className="text-pink-500">Stage</span>
       </h1>
       <p className="text-gray-400 text-base mb-2">You are offline right now.</p>
       <p className="text-gray-600 text-sm">Connect to Wi-Fi to sync with the competition.</p>

@@ -115,7 +115,7 @@ export default function ImportView({ onImport, onReset }: Props) {
     ws["!cols"] = [10,22,22,16,20,12,22,16].map(w => ({ wch:w }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Routines");
-    XLSX.writeFile(wb, "dancecomp-template.xlsx");
+    XLSX.writeFile(wb, "nexttostage-template.xlsx");
   }
 
   const valStatus = missing.length > 0 ? "err" : invalid.length > 0 ? "warn" : "ok";

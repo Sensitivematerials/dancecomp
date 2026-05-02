@@ -36,7 +36,7 @@ export default function Header({ view, setView, role, userName, unread, chatOpen
   return (
     <header className="flex items-center justify-between px-4 pr-5 h-[56px] flex-shrink-0 border-b z-50 gap-2" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
       <button onClick={onShowEvents} className="flex items-center gap-2 min-w-0 flex-shrink-0">
-        <div className="font-display text-[20px] tracking-[2px] whitespace-nowrap">Dance<span className="text-pink-500">Comp</span></div>
+        <div className="font-display text-[20px] tracking-[2px] whitespace-nowrap">NextTo<span className="text-pink-500">Stage</span></div>
         {activeEvent && (
           <div className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-[6px] border" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
             <span className="font-mono text-[10px] text-gray-600 truncate max-w-[100px]">{activeEvent.name}</span>
