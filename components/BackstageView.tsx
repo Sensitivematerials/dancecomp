@@ -20,6 +20,8 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [showAdd, setShowAdd] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [newR, setNewR] = useState({ number: "", studio: "", title: "", division: "" });
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: routines.length };
@@ -83,12 +85,22 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
         const s = getStatus(r);
         return (
           <div key={r.id}
-            className={`rounded-[14px] border mb-2.5 overflow-hidden ${s==="completed"||r.scratched?"opacity-50":""}`}
-            style={{ background: r.scratched ? "rgba(255,82,88,0.05)" : s==="stage" ? "rgba(255,208,96,0.10)" : "var(--card)", borderColor: r.scratched ? "rgba(255,82,88,0.25)" : "var(--border)" }}>
+            draggable
+            onDragStart={() => setDragId(r.id)}
+            onDragOver={e => { e.preventDefault(); setDragOverId(r.id); }}
+            onDragEnd={async () => {
+              if (dragId && dragOverId && dragId !== dragOverId) {
+                const from = routines.findIndex(x => x.id === dragId);
+                const to = routines.findIndex(x => x.id === dragOverId);
+                if (from !== -1 && to !== -1) await reorderRoutine(dragId, to > from ? "down" : "up");
+              }
+              setDragId(null); setDragOverId(null);
+            }}
+            className={`rounded-[14px] border mb-2.5 overflow-hidden transition-all ${s==="completed"||r.scratched?"opacity-50":""} ${dragOverId===r.id && dragId!==r.id ? "border-pink-500 scale-[1.01]" : ""}`}
+            style={{ background: r.scratched ? "rgba(255,82,88,0.05)" : s==="stage" ? "rgba(255,208,96,0.10)" : "var(--card)", borderColor: dragOverId===r.id && dragId!==r.id ? "" : r.scratched ? "rgba(255,82,88,0.25)" : "var(--border)", cursor: dragId===r.id ? "grabbing" : "grab" }}>
             <div className="flex items-center gap-3.5 px-4 pt-4 pb-3">
-              <div className="flex flex-col gap-0.5 mr-1">
-                <button onClick={() => reorderRoutine(r.id, "up")} className="w-6 h-6 rounded flex items-center justify-center text-gray-600 hover:text-white hover:bg-white/10 transition-all text-[10px]">▲</button>
-                <button onClick={() => reorderRoutine(r.id, "down")} className="w-6 h-6 rounded flex items-center justify-center text-gray-600 hover:text-white hover:bg-white/10 transition-all text-[10px]">▼</button>
+              <div className="flex flex-col gap-[3px] mr-1 px-1 py-2 opacity-30 hover:opacity-70 transition-opacity cursor-grab">
+                {[0,1,2,3,4,5].map(i => <div key={i} className="w-[14px] h-[2px] rounded-full bg-gray-400" />)}
               </div>
               <div className={`font-display text-[40px] leading-none min-w-[56px] ${r.scratched ? "text-red-400 line-through" : { stage:"text-yellow-300", ready:"text-emerald-400", checked:"text-amber-400", "not-here":"text-gray-600", completed:"text-gray-600" }[s]}`}>{r.number}</div>
               <div className="flex-1 min-w-0">
