@@ -90,9 +90,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
             onDragOver={e => { e.preventDefault(); setDragOverId(r.id); }}
             onDragEnd={async () => {
               if (dragId && dragOverId && dragId !== dragOverId) {
-                const from = routines.findIndex(x => x.id === dragId);
-                const to = routines.findIndex(x => x.id === dragOverId);
-                if (from !== -1 && to !== -1) await reorderRoutine(dragId, to > from ? "down" : "up");
+                await reorderRoutine(dragId, dragOverId);
               }
               setDragId(null); setDragOverId(null);
             }}
