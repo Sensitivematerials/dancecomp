@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useBreak } from "@/hooks/useBreak";
 import BreakBanner from "@/components/BreakBanner";
+import { Break } from "@/hooks/useBreak";
 import { Routine } from "@/types";
-interface Props { routines: Routine[]; eventName?: string; onLeave: () => void; eventSlug: string; }
-export default function StageView({ routines, eventName, onLeave, eventSlug }: Props) {
-  const { activeBreak } = useBreak(eventSlug);
+interface Props { routines: Routine[]; eventName?: string; onLeave: () => void; activeBreak: Break | null; }
+export default function StageView({ routines, eventName, onLeave, activeBreak }: Props) {
   const [clock, setClock] = useState("");
   useEffect(() => {
     function tick() { setClock(new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit", second:"2-digit" })); }

@@ -58,7 +58,7 @@ export default function Home() {
 
   // Stage Manager — clean read-only view, no header, no controls
   if (role === "stage") return (
-    <StageView routines={routines.routines} eventName={activeEvent?.name} eventSlug={eventSlug} onLeave={() => { signOut(); setActiveEvent(null); }} />
+    <StageView routines={routines.routines} eventName={activeEvent?.name} activeBreak={breakState.activeBreak} onLeave={() => { signOut(); setActiveEvent(null); }} />
   );
 
   if (fullscreen) return (
