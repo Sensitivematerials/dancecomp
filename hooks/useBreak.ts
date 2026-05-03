@@ -25,30 +25,31 @@ export function useBreak(eventSlug: string) {
         .eq("event_slug", eventSlug)
         .is("ended_at", null)
         .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-      setActiveBreak(data ?? null);
+        .limit(1);
+      setActiveBreak(data?.[0] ?? null);
       setLoading(false);
     }
     fetch();
   }, [eventSlug]);
 
   useEffect(() => {
-    const channel = supabase.channel(`breaks:${eventSlug}`)
+    async function refetch() {
+      const { data } = await supabase
+        .from("breaks")
+        .select("*")
+        .eq("event_slug", eventSlug)
+        .is("ended_at", null)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      setActiveBreak(data?.[0] ?? null);
+    }
+    const channel = supabase
+      .channel(`breaks:${eventSlug}`)
       .on("postgres_changes",
         { event: "*", schema: "public", table: "breaks", filter: `event_slug=eq.${eventSlug}` },
-        async () => {
-          const { data } = await supabase
-            .from("breaks")
-            .select("*")
-            .eq("event_slug", eventSlug)
-            .is("ended_at", null)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .single();
-          setActiveBreak(data ?? null);
-        }
-      ).subscribe();
+        () => refetch()
+      )
+      .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [eventSlug]);
 
