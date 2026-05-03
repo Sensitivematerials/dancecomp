@@ -1,4 +1,5 @@
 "use client";
+import { useBreak } from "@/hooks/useBreak";
 import { useMemo, useState } from "react";
 import { Routine, getStatus } from "@/types";
 import { useRoutines } from "@/hooks/useRoutines";
@@ -6,12 +7,17 @@ import SectionLabel from "./ui/SectionLabel";
 import EmptyState   from "./ui/EmptyState";
 import Button        from "./ui/Button";
 
-type Props = ReturnType<typeof useRoutines> & { onFullscreen?: () => void };
+type Props = ReturnType<typeof useRoutines> & { onFullscreen?: () => void; breakState: ReturnType<typeof useBreak> };
 
-export default function EmceeView({ routines, setOnStage, markCompleted, removeFromStage }: Props) {
+export default function EmceeView({ routines, setOnStage, markCompleted, removeFromStage, breakState }: Props) {
   const [checkinOpen, setCheckinOpen] = useState(false);
 
   const onStage = routines.find(r => r.on_stage);
+  const BREAK_CONFIG: Record<string, { label: string; emoji: string; color: string; bg: string }> = {
+    break:  { label: "Break",        emoji: "☕", color: "#f59e0b", bg: "rgba(245,158,11,0.08)"  },
+    lunch:  { label: "Lunch Break",  emoji: "🍽", color: "#f05aa8", bg: "rgba(240,90,168,0.08)"  },
+    dinner: { label: "Dinner Break", emoji: "🍷", color: "#a78bfa", bg: "rgba(167,139,250,0.08)" },
+  };
 
   const readyQueue = useMemo(() =>
     routines
@@ -40,6 +46,25 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
 
   return (
     <div>
+      {/* ── BREAK MODE ── */}
+      {breakState.activeBreak && (() => {
+        const cfg = BREAK_CONFIG[breakState.activeBreak.type];
+        return (
+          <div className="rounded-[18px] p-6 mb-5 border-2 text-center"
+            style={{ background: cfg.bg, borderColor: cfg.color + "55" }}>
+            <div className="text-[48px] mb-2">{cfg.emoji}</div>
+            <div className="text-[22px] font-bold mb-1" style={{ color: cfg.color }}>{cfg.label}</div>
+            <div className="font-mono text-[13px] mb-4" style={{ color: cfg.color + "99" }}>
+              {breakState.activeBreak.duration_minutes} minute break in progress
+            </div>
+            <button onClick={breakState.endBreak}
+              className="px-8 py-3 rounded-[12px] font-bold text-[15px] text-black transition-all hover:opacity-90"
+              style={{ background: cfg.color }}>
+              End Break →
+            </button>
+          </div>
+        );
+      })()}
       {/* ── ON STAGE ── */}
       <SectionLabel>Now On Stage</SectionLabel>
       <div className="rounded-[18px] p-6 mb-5 relative border-2"

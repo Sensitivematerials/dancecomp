@@ -1,8 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useBreak } from "@/hooks/useBreak";
+import BreakBanner from "@/components/BreakBanner";
 import { Routine } from "@/types";
-interface Props { routines: Routine[]; eventName?: string; onLeave: () => void; }
-export default function StageView({ routines, eventName, onLeave }: Props) {
+interface Props { routines: Routine[]; eventName?: string; onLeave: () => void; eventSlug: string; }
+export default function StageView({ routines, eventName, onLeave, eventSlug }: Props) {
+  const { activeBreak } = useBreak(eventSlug);
   const [clock, setClock] = useState("");
   useEffect(() => {
     function tick() { setClock(new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit", second:"2-digit" })); }
@@ -15,9 +18,11 @@ export default function StageView({ routines, eventName, onLeave }: Props) {
   const upNext = readyQueue[0];
   return (
     <div className="min-h-screen flex flex-col" style={{ background:"var(--black)" }}>
+      {activeBreak && <BreakBanner activeBreak={activeBreak} isEmcee={false} />}
+      {activeBreak && <div style={{ height: "56px" }} />}
       <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0" style={{ borderColor:"var(--border)", background:"var(--surface)" }}>
         <div className="flex items-center gap-3">
-          <div className="font-display text-[20px] tracking-[3px]">Dance<span className="text-pink-500">Comp</span></div>
+          <div className="font-display text-[20px] tracking-[3px]">NextTo<span className="text-pink-500">Stage</span></div>
           {eventName && <span className="text-gray-600 text-[13px]">{eventName}</span>}
         </div>
         <div className="flex items-center gap-3">

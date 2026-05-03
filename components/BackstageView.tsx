@@ -1,5 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
+import BreakCard from "./BreakCard";
+import { useBreak } from "@/hooks/useBreak";
 import { getStatus, RoutineStatus } from "@/types";
 import { useRoutines } from "@/hooks/useRoutines";
 import EmptyState   from "./ui/EmptyState";
@@ -16,7 +18,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "completed", label: "Done" },
   { key: "scratched", label: "✕ Scratched" },
 ];
-export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, scratchRoutine, unScratch, reorderRoutine, updateNote }: Props) {
+export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, scratchRoutine, unScratch, reorderRoutine, updateNote, breakState }: Props & { breakState: ReturnType<typeof useBreak> }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [showAdd, setShowAdd] = useState(false);
@@ -77,6 +79,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
           </button>
         ))}
       </div>
+      <BreakCard onStart={breakState.startBreak} />
       {loading && <div className="font-mono text-[12px] text-gray-600 text-center py-8">Loading…</div>}
       {!loading && filtered.length === 0 && (
         <div className="text-center py-10 text-gray-600 font-mono text-[13px]">
