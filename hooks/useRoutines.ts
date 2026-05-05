@@ -170,7 +170,7 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     // Shift sort_order of all routines after insertion point
     const toShift = routines.filter((_, i) => i >= insertAt);
     for (const r of toShift) {
-      await supabase.from("routines").update({ sort_order: (r.sort_order ?? i) + 1 }).eq("id", r.id);
+      await supabase.from("routines").update({ sort_order: (r.sort_order ?? 0) + 1 }).eq("id", r.id);
     }
     await supabase.from("routines").insert({
       event_slug: eventSlug,
