@@ -163,7 +163,41 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     await Promise.all(reindexed.map(r => supabase.from("routines").update({ sort_order: r.sort_order }).eq("id", r.id)));
   }, [routines]);
 
+  const addBreakToQueue = useCallback(async (afterId: string | null, breakType: string, duration: number) => {
+    // Find position to insert
+    const idx = afterId ? routines.findIndex(r => r.id === afterId) : -1;
+    const insertAt = idx + 1;
+    // Shift sort_order of all routines after insertion point
+    const toShift = routines.filter((_, i) => i >= insertAt);
+    for (const r of toShift) {
+      await supabase.from("routines").update({ sort_order: (r.sort_order ?? i) + 1 }).eq("id", r.id);
+    }
+    await supabase.from("routines").insert({
+      event_slug: eventSlug,
+      number: "BRK",
+      studio: "",
+      title: breakType === "break" ? "Break" : breakType === "lunch" ? "Lunch Break" : "Dinner Break",
+      division: "",
+      dancers: "",
+      age_group: "",
+      music_file: "",
+      notes: "",
+      has_prop: false,
+      checked_in: true,
+      ready: true,
+      on_stage: false,
+      completed: false,
+      is_break: true,
+      break_type: breakType,
+      break_duration: duration,
+      sort_order: insertAt,
+    });
+    // Refetch to get updated order
+    const { data } = await supabase.from("routines").select("*").eq("event_slug", eventSlug).order("sort_order", { ascending: true, nullsFirst: false });
+    if (data) { setRoutines(data); prevRoutines.current = data; }
+  }, [routines, eventSlug]);
+
   const scratchRoutine  = (id: string) => update(id, { scratched: true, on_stage: false });
   const unScratch       = (id: string) => update(id, { scratched: false });
-  return { routines, loading, error, isOnline, updateNote: (id: string, notes: string | null) => update(id, { notes }), checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
+  return { routines, loading, error, isOnline, addBreakToQueue, updateNote: (id: string, notes: string | null) => update(id, { notes }), checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
 }

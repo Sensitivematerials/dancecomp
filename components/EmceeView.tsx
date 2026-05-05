@@ -13,6 +13,12 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
   const [checkinOpen, setCheckinOpen] = useState(false);
 
   const onStage = routines.find(r => r.on_stage);
+  const BREAK_EMCEE_CONFIG: Record<string, { label: string; emoji: string; color: string; bg: string; border: string }> = {
+    break:  { label: "Break",        emoji: "☕", color: "#f59e0b", bg: "rgba(245,158,11,0.10)",  border: "rgba(245,158,11,0.35)"  },
+    lunch:  { label: "Lunch Break",  emoji: "🍽", color: "#f05aa8", bg: "rgba(240,90,168,0.10)",  border: "rgba(240,90,168,0.35)"  },
+    dinner: { label: "Dinner Break", emoji: "🍷", color: "#a78bfa", bg: "rgba(167,139,250,0.10)", border: "rgba(167,139,250,0.35)" },
+  };
+
   const BREAK_CONFIG: Record<string, { label: string; emoji: string; color: string; bg: string }> = {
     break:  { label: "Break",        emoji: "☕", color: "#f59e0b", bg: "rgba(245,158,11,0.08)"  },
     lunch:  { label: "Lunch Break",  emoji: "🍽", color: "#f05aa8", bg: "rgba(240,90,168,0.08)"  },
@@ -112,6 +118,22 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
               <div className="text-[13px] font-semibold text-red-400">Next routine is SCRATCHED — announce to crowd then move on</div>
             </div>
           )}
+          {upNext.is_break ? (() => {
+            const bcfg = BREAK_EMCEE_CONFIG[upNext.break_type ?? "break"];
+            return (
+              <div className="flex items-center gap-4 rounded-[14px] p-5 mb-2.5 border"
+                style={{ background: bcfg.bg, borderColor: bcfg.border }}>
+                <div className="text-[52px] leading-none min-w-[68px] text-center">{bcfg.emoji}</div>
+                <div className="flex-1">
+                  <div className="text-[17px] font-semibold" style={{ color: bcfg.color }}>{bcfg.label}</div>
+                  <div className="font-mono text-[13px] mt-1" style={{ color: bcfg.color + "99" }}>{upNext.break_duration} minutes</div>
+                </div>
+                <Button variant="stage" size="sm" onClick={async () => { await breakState.startBreak(upNext.break_type as any ?? "break", upNext.break_duration ?? 15); await markCompleted(upNext.id); }}>
+                  {bcfg.emoji} Start Break
+                </Button>
+              </div>
+            );
+          })() : (
           <div className={`flex items-center gap-4 rounded-[14px] p-5 mb-2.5 border`}
             style={{
               background: upNext.scratched ? "rgba(255,82,88,0.07)" : "rgba(32,212,156,0.09)",
@@ -139,9 +161,24 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
               {upNext.scratched ? "📢 Announce" : "🎭 Put On Stage"}
             </Button>
           </div>
+          )}
 
           {/* Rest of queue */}
-          {rest.map(r => (
+          {rest.map(r => {
+            if (r.is_break) {
+              const bcfg = BREAK_EMCEE_CONFIG[r.break_type ?? "break"];
+              return (
+                <div key={r.id} className="flex items-center gap-3 rounded-[10px] px-4 py-3 mb-2 border"
+                  style={{ background: bcfg.bg, borderColor: bcfg.border }}>
+                  <div className="text-[24px] min-w-[46px] text-center">{bcfg.emoji}</div>
+                  <div className="flex-1">
+                    <div className="text-[13px] font-semibold" style={{ color: bcfg.color }}>{bcfg.label}</div>
+                    <div className="font-mono text-[10px]" style={{ color: bcfg.color + "99" }}>{r.break_duration} min</div>
+                  </div>
+                </div>
+              );
+            }
+            return (
             <div key={r.id} className={`flex items-center gap-3 rounded-[10px] px-4 py-3 mb-2 border`}
               style={{ background: r.scratched ? "rgba(255,82,88,0.05)" : "var(--card)", borderColor: r.scratched ? "rgba(255,82,88,0.20)" : "var(--border)" }}>
               <div className={`font-display text-[28px] leading-none min-w-[46px] ${r.scratched ? "text-red-400 line-through" : "text-emerald-400"}`}>{r.number}</div>
@@ -155,7 +192,8 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
                 {r.scratched ? "📢" : "🎭 Put On Stage"}
               </Button>
             </div>
-          ))}
+            );
+          })}
         </>
       )}
 

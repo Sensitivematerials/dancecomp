@@ -92,7 +92,7 @@ export default function Home() {
         <main className="flex-1 overflow-y-auto p-4 md:p-7 transition-all duration-300" style={{ marginRight: chat.open ? "320px" : "0" }}>
           <div className="max-w-2xl mx-auto w-full">
             {view === "emcee" && <EmceeView {...routines} onFullscreen={() => setFullscreen(true)} breakState={breakState} />}
-            {view === "backstage" && <BackstageView {...routines} breakState={breakState} />}
+            {view === "backstage" && <BackstageView {...routines} />}
             {view === "import" && <ImportView onImport={async (rows) => { await routines.clearAll(); await routines.bulkInsert(rows as any); setView("backstage"); }} onReset={() => setShowReset(true)} />}
           </div>
         </main>

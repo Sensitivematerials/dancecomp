@@ -16,6 +16,9 @@ export interface Routine {
   notes: string | null;
   has_prop: boolean;
   scratched?: boolean;
+  is_break?: boolean;
+  break_type?: string | null;
+  break_duration?: number | null;
   sort_order?: number;
   created_at: string;
 }

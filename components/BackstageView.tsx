@@ -1,7 +1,5 @@
 "use client";
 import { useMemo, useState } from "react";
-import BreakCard from "./BreakCard";
-import { useBreak } from "@/hooks/useBreak";
 import { getStatus, RoutineStatus } from "@/types";
 import { useRoutines } from "@/hooks/useRoutines";
 import EmptyState   from "./ui/EmptyState";
@@ -18,12 +16,15 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "completed", label: "Done" },
   { key: "scratched", label: "✕ Scratched" },
 ];
-export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, scratchRoutine, unScratch, reorderRoutine, updateNote, breakState }: Props & { breakState: ReturnType<typeof useBreak> }) {
+export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, addBreakToQueue, scratchRoutine, unScratch, reorderRoutine, updateNote }: Props) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [showAdd, setShowAdd] = useState(false);
   const [pickingId, setPickingId] = useState<string | null>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [insertBreakAfter, setInsertBreakAfter] = useState<string | null>(null);
+  const [breakType, setBreakType] = useState<string>("break");
+  const [breakDuration, setBreakDuration] = useState(15);
   const [noteText, setNoteText] = useState("");
   const [newR, setNewR] = useState({ number: "", studio: "", title: "", division: "" });
   const counts = useMemo(() => {
@@ -79,7 +80,6 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
           </button>
         ))}
       </div>
-      <BreakCard onStart={breakState.startBreak} />
       {loading && <div className="font-mono text-[12px] text-gray-600 text-center py-8">Loading…</div>}
       {!loading && filtered.length === 0 && (
         <div className="text-center py-10 text-gray-600 font-mono text-[13px]">
@@ -134,6 +134,42 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
                 <button onClick={() => setEditingNoteId(null)} className="px-3 h-[36px] rounded-[8px] text-[12px] text-gray-500 border" style={{ borderColor: "var(--border2)" }}>✕</button>
               </div>
             )}
+            {/* Break insert panel */}
+            {insertBreakAfter === r.id && (
+              <div className="mx-4 mb-3 rounded-[10px] border overflow-hidden" style={{ borderColor: "rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.06)" }}>
+                <div className="px-3 py-2 font-mono text-[10px] text-amber-400 tracking-widest uppercase border-b" style={{ borderColor: "rgba(245,158,11,0.2)" }}>Insert Break After #{r.number}</div>
+                <div className="p-3">
+                  <div className="flex gap-2 mb-3">
+                    {[["break","☕","Break"],["lunch","🍽","Lunch"],["dinner","🍷","Dinner"]].map(([t,e,l]) => (
+                      <button key={t} onClick={() => setBreakType(t)}
+                        className="flex-1 h-[38px] rounded-[8px] border text-[12px] font-semibold transition-all"
+                        style={{ background: breakType===t ? "rgba(245,158,11,0.15)" : "transparent", borderColor: breakType===t ? "rgba(245,158,11,0.5)" : "var(--border)", color: breakType===t ? "#f59e0b" : "var(--muted)" }}>
+                        {e} {l}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-1.5 mb-3 flex-wrap">
+                    {[10,15,20,30,45,60].map(d => (
+                      <button key={d} onClick={() => setBreakDuration(d)}
+                        className="h-[30px] px-2.5 rounded-[6px] border font-mono text-[11px] transition-all"
+                        style={{ background: breakDuration===d ? "rgba(245,158,11,0.15)" : "transparent", borderColor: breakDuration===d ? "rgba(245,158,11,0.5)" : "var(--border)", color: breakDuration===d ? "#f59e0b" : "var(--muted)" }}>
+                        {d}m
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={async () => { await addBreakToQueue(r.id, breakType, breakDuration); setInsertBreakAfter(null); }}
+                      className="flex-1 h-[36px] rounded-[8px] font-bold text-[12px] text-black"
+                      style={{ background: "#f59e0b" }}>
+                      ☕ Add to Queue
+                    </button>
+                    <button onClick={() => setInsertBreakAfter(null)}
+                      className="px-3 h-[36px] rounded-[8px] border text-[12px] text-gray-500"
+                      style={{ borderColor: "var(--border2)" }}>✕</button>
+                  </div>
+                </div>
+              </div>
+            )}
             {pickingId === r.id && (
               <div className="mx-4 mb-3 rounded-[10px] border overflow-hidden" style={{ borderColor: "rgba(167,139,250,0.3)", background: "rgba(167,139,250,0.06)" }}>
                 <div className="px-3 py-2 font-mono text-[10px] text-purple-400 tracking-widest uppercase border-b" style={{ borderColor: "rgba(167,139,250,0.2)" }}>Move after...</div>
@@ -167,6 +203,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
                   {!r.on_stage && !r.completed && r.checked_in && <Button variant="stage" size="sm" onClick={() => setOnStage(r.id)}>🎭 On Stage</Button>}
                   {r.on_stage && <><Button variant="green" size="sm" onClick={() => markCompleted(r.id)}>✔ Done</Button><Button variant="red" size="sm" onClick={() => removeFromStage(r.id)}>✕ Remove</Button></>}
                   {r.completed && <Button variant="ghost" size="sm" onClick={() => checkIn(r.id)}>Re-Check In</Button>}
+                  {!r.on_stage && !r.is_break && <Button variant="ghost" size="sm" onClick={() => setInsertBreakAfter(insertBreakAfter === r.id ? null : r.id)}>☕ Break After</Button>}
                   {!r.on_stage && <Button variant="red" size="sm" onClick={() => scratchRoutine(r.id)}>✕ Scratch</Button>}
                   <Button variant={r.has_prop ? "prop-on" : "prop-off"} size="sm" onClick={() => toggleProp(r.id)}>{r.has_prop ? "🎬 Has Prop" : "🎬 No Prop"}</Button>
                   {!r.notes && <Button variant="ghost" size="sm" onClick={() => { setEditingNoteId(r.id); setNoteText(""); }}>📝 Add Note</Button>}
