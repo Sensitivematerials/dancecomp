@@ -65,7 +65,7 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
             const updated = payload.new as Routine;
             const prev = prevRoutines.current.find(r => r.id === updated.id);
             if (role === "emcee" && updated.ready && prev && !prev.ready) vibrateReady();
-            setRoutines(p => p.map(r => r.id === updated.id ? updated : r));
+            setRoutines(p => p.map(r => r.id === updated.id ? updated : r).sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999)));
             prevRoutines.current = prevRoutines.current.map(r => r.id === updated.id ? updated : r);
           }
           if (payload.eventType === "DELETE") {

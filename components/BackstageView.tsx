@@ -51,7 +51,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
       list = list.filter(r => r.number.toLowerCase().includes(q) || r.studio.toLowerCase().includes(q) || r.title.toLowerCase().includes(q) || r.division.toLowerCase().includes(q));
     }
     if (filter !== "all" && filter !== "scratched") list = list.filter(r => getStatus(r) === filter);
-    return list;
+    return [...list].sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999));
   }, [routines, search, filter]);
 
   async function handleAdd() {

@@ -79,7 +79,7 @@ export default function StageView({ routines, eventName, onLeave, activeBreak }:
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col justify-center items-start px-10 py-10" style={{ borderRight:"1px solid var(--border)" }}>
           <div className="font-mono text-[11px] tracking-[3px] uppercase text-gray-600 mb-8">Now On Stage</div>
-          {onStage ? (
+          {onStage && !onStage.is_break ? (
             <div className="w-full">
               <div className="font-display text-yellow-300 leading-none mb-5" style={{ fontSize:"clamp(80px,18vw,200px)", letterSpacing:"4px" }}>{onStage.number}</div>
               <div className="text-white font-bold mb-2" style={{ fontSize:"clamp(20px,3vw,42px)" }}>{onStage.title}</div>

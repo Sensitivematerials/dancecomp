@@ -28,18 +28,18 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
   const readyQueue = useMemo(() =>
     routines
       .filter(r => r.ready && !r.on_stage && !r.completed)
-      .sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }))
+      .sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999))
   , [routines]);
 
   const scratchedInQueue = useMemo(() =>
     routines
       .filter(r => r.scratched && r.checked_in && !r.on_stage && !r.completed)
-      .sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }))
+      .sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999))
   , [routines]);
 
   const fullQueue = useMemo(() => {
     const combined = [...readyQueue, ...scratchedInQueue];
-    return combined.sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }));
+    return combined.sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999));
   }, [readyQueue, scratchedInQueue]);
 
   const checkedIn = useMemo(() =>
@@ -63,7 +63,7 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
             <div className="font-mono text-[13px] mb-4" style={{ color: cfg.color + "99" }}>
               {breakState.activeBreak.duration_minutes} minute break in progress
             </div>
-            <button onClick={breakState.endBreak}
+            <button onClick={async () => { await breakState.endBreak(); if (onStage?.is_break) await markCompleted(onStage.id); }}
               className="px-8 py-3 rounded-[12px] font-bold text-[15px] text-black transition-all hover:opacity-90"
               style={{ background: cfg.color }}>
               End Break →
@@ -128,7 +128,7 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
                   <div className="text-[17px] font-semibold" style={{ color: bcfg.color }}>{bcfg.label}</div>
                   <div className="font-mono text-[13px] mt-1" style={{ color: bcfg.color + "99" }}>{upNext.break_duration} minutes</div>
                 </div>
-                <Button variant="stage" size="sm" onClick={async () => { await breakState.startBreak(upNext.break_type as any ?? "break", upNext.break_duration ?? 15); await markCompleted(upNext.id); }}>
+                <Button variant="stage" size="sm" onClick={async () => { await breakState.startBreak(upNext.break_type as any ?? "break", upNext.break_duration ?? 15); await setOnStage(upNext.id); }}>
                   {bcfg.emoji} Start Break
                 </Button>
               </div>
