@@ -127,7 +127,7 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
   const markCompleted   = useCallback(async (id: string) => {
     await update(id, { on_stage: false, completed: true, ready: false });
     const { data: remaining } = await supabase.from("routines")
-      .select("id").eq("event_slug", eventSlug).eq("completed", false).eq("scratched", false);
+      .select("id").eq("event_slug", eventSlug).eq("completed", false).eq("scratched", false).eq("is_break", false);
     if (remaining && remaining.length === 0) {
       await supabase.from("events").update({ show_ended_at: new Date().toISOString() }).eq("slug", eventSlug);
     }
@@ -164,14 +164,16 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
   }, [routines]);
 
   const addBreakToQueue = useCallback(async (afterId: string | null, breakType: string, duration: number) => {
-    // Find position to insert
-    const idx = afterId ? routines.findIndex(r => r.id === afterId) : -1;
+    // Sort by actual sort_order so array index reflects true display position
+    const sorted = [...routines].sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999));
+    const idx = afterId ? sorted.findIndex(r => r.id === afterId) : -1;
     const insertAt = idx + 1;
-    // Shift sort_order of all routines after insertion point
-    const toShift = routines.filter((_, i) => i >= insertAt);
-    for (const r of toShift) {
-      await supabase.from("routines").update({ sort_order: (r.sort_order ?? 0) + 1 }).eq("id", r.id);
-    }
+    // Normalize all sort_orders to clean integers and shift everything at/after insertAt up by 1
+    await Promise.all(
+      sorted.map((r, i) =>
+        supabase.from("routines").update({ sort_order: i < insertAt ? i : i + 1 }).eq("id", r.id)
+      )
+    );
     await supabase.from("routines").insert({
       event_slug: eventSlug,
       number: "BRK",
@@ -192,12 +194,16 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
       break_duration: duration,
       sort_order: insertAt,
     });
-    // Refetch to get updated order
     const { data } = await supabase.from("routines").select("*").eq("event_slug", eventSlug).order("sort_order", { ascending: true, nullsFirst: false });
     if (data) { setRoutines(data); prevRoutines.current = data; }
   }, [routines, eventSlug]);
 
   const scratchRoutine  = (id: string) => update(id, { scratched: true, on_stage: false });
   const unScratch       = (id: string) => update(id, { scratched: false });
-  return { routines, loading, error, isOnline, addBreakToQueue, updateNote: (id: string, notes: string | null) => update(id, { notes }), checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
+  const deleteRoutine   = useCallback(async (id: string) => {
+    setRoutines(prev => prev.filter(r => r.id !== id));
+    prevRoutines.current = prevRoutines.current.filter(r => r.id !== id);
+    await supabase.from("routines").delete().eq("id", id);
+  }, []);
+  return { routines, loading, error, isOnline, addBreakToQueue, updateNote: (id: string, notes: string | null) => update(id, { notes }), checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, deleteRoutine, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
 }
