@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import BreakBanner from "@/components/BreakBanner";
-import { Break } from "@/hooks/useBreak";
+import { Break, BreakType } from "@/hooks/useBreak";
 import { Routine } from "@/types";
 
 const BREAK_STAGE_CONFIG: Record<string, { label: string; emoji: string; color: string }> = {
@@ -52,19 +52,50 @@ function BreakOnStageDisplay({ activeBreak }: { activeBreak: Break }) {
 interface Props { routines: Routine[]; eventName?: string; onLeave: () => void; activeBreak: Break | null; }
 export default function StageView({ routines, eventName, onLeave, activeBreak }: Props) {
   const [clock, setClock] = useState("");
+  const [localBreakStart, setLocalBreakStart] = useState<number | null>(null);
+
   useEffect(() => {
     function tick() { setClock(new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit", second:"2-digit" })); }
     tick(); const t = setInterval(tick, 1000); return () => clearInterval(t);
   }, []);
+
   const onStage = routines.find(r => r.on_stage);
+
+  // Track local start time when a break goes on stage — fallback if breaks realtime doesn't fire
+  useEffect(() => {
+    if (onStage?.is_break && !localBreakStart) {
+      setLocalBreakStart(Date.now());
+    }
+    if (!onStage?.is_break) {
+      setLocalBreakStart(null);
+    }
+  }, [onStage?.is_break, onStage?.id]);
+
+  // Use activeBreak (authoritative) or synthesise one from the routine + local start time
+  const effectiveBreak = useMemo<Break | null>(() => {
+    if (activeBreak) return activeBreak;
+    if (onStage?.is_break && localBreakStart) {
+      return {
+        id: onStage.id,
+        event_slug: onStage.event_slug,
+        type: (onStage.break_type ?? "break") as BreakType,
+        duration_minutes: onStage.break_duration ?? 15,
+        started_at: new Date(localBreakStart).toISOString(),
+        ended_at: null,
+      };
+    }
+    return null;
+  }, [activeBreak, onStage?.is_break, onStage?.id, localBreakStart]);
+
   const readyQueue = routines
     .filter(r => (r.ready || r.scratched) && !r.on_stage && !r.completed)
     .sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999));
   const upNext = readyQueue[0];
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background:"var(--black)" }}>
-      {activeBreak && <BreakBanner activeBreak={activeBreak} isEmcee={false} />}
-      {activeBreak && <div style={{ height: "56px" }} />}
+      {effectiveBreak && <BreakBanner activeBreak={effectiveBreak} isEmcee={false} />}
+      {effectiveBreak && <div style={{ height: "56px" }} />}
       <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0" style={{ borderColor:"var(--border)", background:"var(--surface)" }}>
         <div className="flex items-center gap-3">
           <div className="font-display text-[20px] tracking-[3px]">NextTo<span className="text-pink-500">Stage</span></div>
@@ -92,8 +123,8 @@ export default function StageView({ routines, eventName, onLeave, activeBreak }:
                 </div>
               )}
             </div>
-          ) : activeBreak ? (
-            <BreakOnStageDisplay activeBreak={activeBreak} />
+          ) : effectiveBreak ? (
+            <BreakOnStageDisplay activeBreak={effectiveBreak} />
           ) : (
             <div className="font-mono text-gray-700" style={{ fontSize:"clamp(16px,2vw,28px)" }}>Stage is clear</div>
           )}
