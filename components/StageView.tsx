@@ -3,6 +3,52 @@ import { useEffect, useState } from "react";
 import BreakBanner from "@/components/BreakBanner";
 import { Break } from "@/hooks/useBreak";
 import { Routine } from "@/types";
+
+const BREAK_STAGE_CONFIG: Record<string, { label: string; emoji: string; color: string }> = {
+  break:  { label: "Break",        emoji: "☕", color: "#f59e0b" },
+  lunch:  { label: "Lunch Break",  emoji: "🍽", color: "#f05aa8" },
+  dinner: { label: "Dinner Break", emoji: "🍷", color: "#a78bfa" },
+};
+
+function BreakOnStageDisplay({ activeBreak }: { activeBreak: Break }) {
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [overtime, setOvertime] = useState(false);
+  const cfg = BREAK_STAGE_CONFIG[activeBreak.type] ?? BREAK_STAGE_CONFIG.break;
+
+  useEffect(() => {
+    function calc() {
+      const started = new Date(activeBreak.started_at).getTime();
+      const endsAt = started + activeBreak.duration_minutes * 60 * 1000;
+      const diff = Math.floor((endsAt - Date.now()) / 1000);
+      setSecondsLeft(Math.abs(diff));
+      setOvertime(diff < 0);
+    }
+    calc();
+    const interval = setInterval(calc, 1000);
+    return () => clearInterval(interval);
+  }, [activeBreak]);
+
+  function fmt(s: number) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  }
+
+  return (
+    <div className="w-full">
+      <div className="leading-none mb-4" style={{ fontSize:"clamp(80px,18vw,160px)" }}>{cfg.emoji}</div>
+      <div className="font-bold mb-3" style={{ fontSize:"clamp(20px,3vw,42px)", color: cfg.color }}>{cfg.label}</div>
+      <div className={`font-mono font-bold tabular-nums mb-2 ${overtime ? "animate-pulse" : ""}`}
+        style={{ fontSize:"clamp(40px,8vw,100px)", color: cfg.color }}>
+        {overtime ? "+" : ""}{fmt(secondsLeft)}
+      </div>
+      <div className="font-mono" style={{ fontSize:"clamp(12px,1.5vw,20px)", color: cfg.color + "80" }}>
+        {overtime ? "overtime" : "remaining"} · {activeBreak.duration_minutes} min break
+      </div>
+    </div>
+  );
+}
+
 interface Props { routines: Routine[]; eventName?: string; onLeave: () => void; activeBreak: Break | null; }
 export default function StageView({ routines, eventName, onLeave, activeBreak }: Props) {
   const [clock, setClock] = useState("");
@@ -13,7 +59,7 @@ export default function StageView({ routines, eventName, onLeave, activeBreak }:
   const onStage = routines.find(r => r.on_stage);
   const readyQueue = routines
     .filter(r => (r.ready || r.scratched) && !r.on_stage && !r.completed)
-    .sort((a,b) => a.number.localeCompare(b.number, undefined, { numeric: true }));
+    .sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999));
   const upNext = readyQueue[0];
   return (
     <div className="min-h-screen flex flex-col" style={{ background:"var(--black)" }}>
@@ -46,6 +92,8 @@ export default function StageView({ routines, eventName, onLeave, activeBreak }:
                 </div>
               )}
             </div>
+          ) : activeBreak ? (
+            <BreakOnStageDisplay activeBreak={activeBreak} />
           ) : (
             <div className="font-mono text-gray-700" style={{ fontSize:"clamp(16px,2vw,28px)" }}>Stage is clear</div>
           )}
@@ -54,13 +102,23 @@ export default function StageView({ routines, eventName, onLeave, activeBreak }:
           <div className="flex-1 flex flex-col justify-center px-8 py-8" style={{ borderBottom:"1px solid var(--border)", background: upNext?.scratched ? "rgba(255,82,88,0.05)" : "rgba(32,212,156,0.03)" }}>
             <div className="font-mono text-[10px] tracking-[2px] uppercase text-gray-600 mb-4">Up Next</div>
             {upNext ? (
-              <>
-                <div className={`font-display leading-none mb-3 ${upNext.scratched ? "text-red-400 line-through" : "text-emerald-400"}`} style={{ fontSize:"clamp(48px,8vw,88px)" }}>{upNext.number}</div>
-                <div className={`font-semibold mb-1 ${upNext.scratched ? "line-through text-gray-500" : "text-white"}`} style={{ fontSize:"clamp(13px,1.8vw,20px)" }}>{upNext.title}</div>
-                <div className="text-gray-500" style={{ fontSize:"clamp(11px,1.2vw,16px)" }}>{upNext.studio}</div>
-                {upNext.scratched && <div className="font-mono text-[11px] text-red-400 mt-2 tracking-wider">SCRATCHED</div>}
-                {upNext.has_prop && !upNext.scratched && <div className="mt-3 text-orange-400 font-mono text-[11px]">🎬 PROP REQUIRED</div>}
-              </>
+              upNext.is_break ? (
+                <>
+                  <div style={{ fontSize:"clamp(48px,8vw,88px)" }}>
+                    {upNext.break_type === "lunch" ? "🍽" : upNext.break_type === "dinner" ? "🍷" : "☕"}
+                  </div>
+                  <div className="font-semibold text-amber-400 mt-2" style={{ fontSize:"clamp(13px,1.8vw,20px)" }}>{upNext.title}</div>
+                  <div className="font-mono text-amber-400/60 mt-1" style={{ fontSize:"clamp(11px,1.2vw,16px)" }}>{upNext.break_duration} min</div>
+                </>
+              ) : (
+                <>
+                  <div className={`font-display leading-none mb-3 ${upNext.scratched ? "text-red-400 line-through" : "text-emerald-400"}`} style={{ fontSize:"clamp(48px,8vw,88px)" }}>{upNext.number}</div>
+                  <div className={`font-semibold mb-1 ${upNext.scratched ? "line-through text-gray-500" : "text-white"}`} style={{ fontSize:"clamp(13px,1.8vw,20px)" }}>{upNext.title}</div>
+                  <div className="text-gray-500" style={{ fontSize:"clamp(11px,1.2vw,16px)" }}>{upNext.studio}</div>
+                  {upNext.scratched && <div className="font-mono text-[11px] text-red-400 mt-2 tracking-wider">SCRATCHED</div>}
+                  {upNext.has_prop && !upNext.scratched && <div className="mt-3 text-orange-400 font-mono text-[11px]">🎬 PROP REQUIRED</div>}
+                </>
+              )
             ) : <div className="font-mono text-gray-700 text-[13px]">No routines ready</div>}
           </div>
           <div className="overflow-y-auto px-6 py-4">
