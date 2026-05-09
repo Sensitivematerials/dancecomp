@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/lib/supabase";
 import { Routine } from "@/types";
 
@@ -50,6 +51,12 @@ export default function AudiencePage({ params }: { params: { slug: string } }) {
   const [activeBreak, setActiveBreak] = useState<BreakRecord | null>(null);
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [pageUrl, setPageUrl] = useState("");
+
+  // Capture current URL for QR code (client-side only)
+  useEffect(() => {
+    setPageUrl(window.location.href);
+  }, []);
 
   // Live clock tick
   useEffect(() => {
@@ -300,6 +307,33 @@ export default function AudiencePage({ params }: { params: { slug: string } }) {
           </div>
         )}
       </div>
+
+      {/* ── QR code — bottom-right corner ──────────────────────────────── */}
+      {pageUrl && (
+        <div
+          className="fixed bottom-4 right-4 flex flex-col items-center gap-1.5 group cursor-default"
+          style={{ zIndex: 50 }}
+        >
+          <div
+            className="rounded-[10px] p-2 transition-transform duration-200 group-hover:scale-125"
+            style={{ background: "rgba(9,9,12,0.70)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <QRCodeSVG
+              value={pageUrl}
+              size={80}
+              bgColor="transparent"
+              fgColor="#eeeef5"
+              level="M"
+            />
+          </div>
+          <div
+            className="font-mono text-[9px] tracking-[1.5px] uppercase text-center"
+            style={{ color: "rgba(255,255,255,0.30)" }}
+          >
+            Scan to follow along
+          </div>
+        </div>
+      )}
     </div>
   );
 }
