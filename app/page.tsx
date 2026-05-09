@@ -10,6 +10,7 @@ import LoginScreen from "@/components/LoginScreen";
 import FullscreenMode from "@/components/FullscreenMode";
 import ResetModal from "@/components/ResetModal";
 import StageView from "@/components/StageView";
+import LightingView from "@/components/LightingView";
 import { useRoutines } from "@/hooks/useRoutines";
 import { useBreak } from "@/hooks/useBreak";
 import BreakBanner from "@/components/BreakBanner";
@@ -41,7 +42,7 @@ export default function Home() {
   const [fullscreen, setFullscreen] = useState(false);
   const [showReset, setShowReset] = useState(false);
 
-  function handleEnter(name: string, r: "emcee" | "backstage" | "stage", ev: Event) {
+  function handleEnter(name: string, r: "emcee" | "backstage" | "stage" | "lighting", ev: Event) {
     signIn(name, r);
     setActiveEvent(ev);
     setView(r === "emcee" ? "emcee" : "backstage");
@@ -221,6 +222,10 @@ export default function Home() {
 
   if (role === "stage") return (
     <StageView routines={routines.routines} eventName={activeEvent?.name} activeBreak={breakState.activeBreak} onLeave={() => { signOut(); setActiveEvent(null); }} />
+  );
+
+  if (role === "lighting") return (
+    <LightingView routines={routines.routines} eventName={activeEvent?.name} onLeave={() => { signOut(); setActiveEvent(null); }} />
   );
 
   if (fullscreen) return (
