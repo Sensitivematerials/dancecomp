@@ -205,5 +205,5 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     prevRoutines.current = prevRoutines.current.filter(r => r.id !== id);
     await supabase.from("routines").delete().eq("id", id);
   }, []);
-  return { routines, loading, error, isOnline, addBreakToQueue, updateNote: (id: string, notes: string | null) => update(id, { notes }), checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, deleteRoutine, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
+  return { routines, loading, error, isOnline, addBreakToQueue, updateNote: (id: string, notes: string | null) => update(id, { notes }), updateLightingNote: (id: string, lighting_notes: string | null) => update(id, { lighting_notes }), checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, deleteRoutine, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
 }

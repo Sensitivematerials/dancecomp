@@ -14,6 +14,7 @@ export interface Routine {
   age_group: string | null;
   music_file: string | null;
   notes: string | null;
+  lighting_notes?: string | null;
   has_prop: boolean;
   scratched?: boolean;
   is_break?: boolean;

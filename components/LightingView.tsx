@@ -130,7 +130,7 @@ export default function LightingView({ routines, eventName, onLeave }: Props) {
                 >
                   Lighting Cue
                 </div>
-                {onStage.notes?.trim() ? (
+                {onStage.lighting_notes?.trim() ? (
                   <div
                     className="rounded-[12px] border px-5 py-4"
                     style={{ background: AMBER_DIM, borderColor: AMBER_BORDER }}
@@ -139,7 +139,7 @@ export default function LightingView({ routines, eventName, onLeave }: Props) {
                       className="font-medium leading-relaxed whitespace-pre-wrap"
                       style={{ fontSize: "clamp(16px, 2.2vw, 22px)", color: "#fef3c7" }}
                     >
-                      {onStage.notes}
+                      {onStage.lighting_notes}
                     </p>
                   </div>
                 ) : (
@@ -148,7 +148,7 @@ export default function LightingView({ routines, eventName, onLeave }: Props) {
                     style={{ background: "rgba(255,255,255,0.02)", borderColor: "var(--border)" }}
                   >
                     <p className="text-gray-600 italic" style={{ fontSize: "clamp(14px, 1.8vw, 18px)" }}>
-                      No lighting cue set
+                      No cue set
                     </p>
                   </div>
                 )}
@@ -219,7 +219,7 @@ export default function LightingView({ routines, eventName, onLeave }: Props) {
                     >
                       Cue
                     </div>
-                    {r.notes?.trim() ? (
+                    {r.lighting_notes?.trim() ? (
                       <div
                         className="rounded-[8px] border px-4 py-3"
                         style={{
@@ -234,7 +234,7 @@ export default function LightingView({ routines, eventName, onLeave }: Props) {
                             color: i === 0 ? "#fef3c7" : "#9ca3af",
                           }}
                         >
-                          {r.notes}
+                          {r.lighting_notes}
                         </p>
                       </div>
                     ) : (
