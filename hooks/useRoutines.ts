@@ -62,11 +62,12 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
             prevRoutines.current = [...prevRoutines.current, payload.new as Routine];
           }
           if (payload.eventType === "UPDATE") {
-            const updated = payload.new as Routine;
+            const updated = payload.new as Partial<Routine> & { id: string };
             const prev = prevRoutines.current.find(r => r.id === updated.id);
             if (role === "emcee" && updated.ready && prev && !prev.ready) vibrateReady();
-            setRoutines(p => p.map(r => r.id === updated.id ? updated : r).sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999)));
-            prevRoutines.current = prevRoutines.current.map(r => r.id === updated.id ? updated : r);
+            // Merge rather than replace — guards against partial payloads (e.g. after adding a column)
+            setRoutines(p => p.map(r => r.id === updated.id ? { ...r, ...updated } : r).sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999)));
+            prevRoutines.current = prevRoutines.current.map(r => r.id === updated.id ? { ...r, ...updated } : r);
           }
           if (payload.eventType === "DELETE") {
             setRoutines(prev => prev.filter(r => r.id !== payload.old.id));
