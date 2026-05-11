@@ -222,6 +222,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
                   }}
                 />
                 <button onClick={async () => { await updateNote(r.id, noteText.trim() || null); setEditingNoteId(null); }} className="px-3 h-[36px] rounded-[8px] text-[12px] font-bold text-black" style={{ background: "#fde047" }}>Save</button>
+                <button onClick={async () => { await updateNote(r.id, null); setEditingNoteId(null); }} className="px-3 h-[36px] rounded-[8px] text-[12px] font-bold text-white" style={{ background: "#ef4444" }}>🗑</button>
                 <button onClick={() => setEditingNoteId(null)} className="px-3 h-[36px] rounded-[8px] text-[12px] text-gray-500 border" style={{ borderColor: "var(--border2)" }}>✕</button>
               </div>
             )}
@@ -251,6 +252,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
                   }}
                 />
                 <button onClick={async () => { await updateLightingNote(r.id, lightingNoteText.trim() || null); setEditingLightingNoteId(null); }} className="px-3 h-[36px] rounded-[8px] text-[12px] font-bold text-black" style={{ background: "#f59e0b" }}>Save</button>
+                <button onClick={async () => { await updateLightingNote(r.id, null); setEditingLightingNoteId(null); }} className="px-3 h-[36px] rounded-[8px] text-[12px] font-bold text-white" style={{ background: "#ef4444" }}>🗑</button>
                 <button onClick={() => setEditingLightingNoteId(null)} className="px-3 h-[36px] rounded-[8px] text-[12px] text-gray-500 border" style={{ borderColor: "var(--border2)" }}>✕</button>
               </div>
             )}
