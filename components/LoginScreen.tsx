@@ -33,6 +33,9 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
   const [pwPromptText, setPwPromptText] = useState("");
   const [pwError, setPwError]         = useState("");
 
+  // Shows whose password has been verified this session
+  const [verifiedShows, setVerifiedShows] = useState<string[]>([]);
+
   function handleNext() {
     if (!name.trim()) { setError("Enter your name"); return; }
     if (!role) { setError("Pick a role"); return; }
@@ -71,6 +74,9 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
     if (pwPromptText === ev.password) {
       setPwPromptId(null);
       setPwError("");
+      if (!verifiedShows.includes(ev.id)) {
+        setVerifiedShows(prev => [...prev, ev.id]);
+      }
       onEnter(name, role!, ev);
     } else {
       setPwError("Incorrect password");
@@ -165,7 +171,7 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
                         }}>
 
                         {/* Delete confirm banner */}
-                        {isConfirming && role !== "stage" && role !== "lighting" && (
+                        {isConfirming && (role === "emcee" || role === "backstage") && (!ev.password || verifiedShows.includes(ev.id)) && (
                           <div className="px-4 py-2.5 flex items-center justify-between gap-2"
                             style={{ background: "rgba(255,82,88,0.12)", borderBottom: "1px solid rgba(255,82,88,0.25)" }}>
                             <span className="text-[13px] font-semibold text-red-400">Delete this show?</span>
@@ -199,7 +205,7 @@ export default function LoginScreen({ events, eventsLoading, onEnter, onCreate, 
                             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                             <span className="font-mono text-[10px] text-emerald-400 mr-1">LIVE</span>
                           </div>
-                          {role !== "stage" && role !== "lighting" && (
+                          {(role === "emcee" || role === "backstage") && (!ev.password || verifiedShows.includes(ev.id)) && (
                             <button onClick={() => { setConfirmId(confirmId === ev.id ? null : ev.id); setPwPromptId(null); }}
                               className="w-9 h-9 rounded-[8px] border flex items-center justify-center flex-shrink-0 transition-all"
                               style={{
