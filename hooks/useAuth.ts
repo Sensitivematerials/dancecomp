@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 
-export type UserRole = "emcee" | "backstage" | "stage" | null;
+export type UserRole = "emcee" | "backstage" | "stage" | "lighting" | null;
 
 export interface SessionUser {
   name: string;
-  role: "emcee" | "backstage" | "stage";
+  role: "emcee" | "backstage" | "stage" | "lighting";
 }
 
 export function useAuth() {
@@ -20,7 +20,7 @@ export function useAuth() {
     setLoading(false);
   }, []);
 
-  function signIn(name: string, role: "emcee" | "backstage" | "stage") {
+  function signIn(name: string, role: "emcee" | "backstage" | "stage" | "lighting") {
     const u = { name, role };
     sessionStorage.setItem("dancecomp_user", JSON.stringify(u));
     setUser(u);

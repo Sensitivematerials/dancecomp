@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase, DEFAULT_EVENT } from "@/lib/supabase";
 import { Routine } from "@/types";
 
-export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backstage" | "stage" | null) {
+export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backstage" | "stage" | "lighting" | null) {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,11 +62,12 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
             prevRoutines.current = [...prevRoutines.current, payload.new as Routine];
           }
           if (payload.eventType === "UPDATE") {
-            const updated = payload.new as Routine;
+            const updated = payload.new as Partial<Routine> & { id: string };
             const prev = prevRoutines.current.find(r => r.id === updated.id);
             if (role === "emcee" && updated.ready && prev && !prev.ready) vibrateReady();
-            setRoutines(p => p.map(r => r.id === updated.id ? updated : r).sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999)));
-            prevRoutines.current = prevRoutines.current.map(r => r.id === updated.id ? updated : r);
+            // Merge rather than replace — guards against partial payloads (e.g. after adding a column)
+            setRoutines(p => p.map(r => r.id === updated.id ? { ...r, ...updated } : r).sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999)));
+            prevRoutines.current = prevRoutines.current.map(r => r.id === updated.id ? { ...r, ...updated } : r);
           }
           if (payload.eventType === "DELETE") {
             setRoutines(prev => prev.filter(r => r.id !== payload.old.id));
@@ -198,12 +199,12 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     if (data) { setRoutines(data); prevRoutines.current = data; }
   }, [routines, eventSlug]);
 
-  const scratchRoutine  = (id: string) => update(id, { scratched: true, on_stage: false });
+  const scratchRoutine  = (id: string) => update(id, { scratched: true, on_stage: false, checked_in: true, ready: true });
   const unScratch       = (id: string) => update(id, { scratched: false });
   const deleteRoutine   = useCallback(async (id: string) => {
     setRoutines(prev => prev.filter(r => r.id !== id));
     prevRoutines.current = prevRoutines.current.filter(r => r.id !== id);
     await supabase.from("routines").delete().eq("id", id);
   }, []);
-  return { routines, loading, error, isOnline, addBreakToQueue, updateNote: (id: string, notes: string | null) => update(id, { notes }), checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, deleteRoutine, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
+  return { routines, loading, error, isOnline, addBreakToQueue, updateNote: (id: string, notes: string | null) => update(id, { notes }), updateLightingNote: (id: string, lighting_notes: string | null) => update(id, { lighting_notes }), checkIn, undoCheckIn, markReady, unMarkReady, markNotReady, reorderRoutine, scratchRoutine, unScratch, deleteRoutine, setOnStage, removeFromStage, markCompleted, toggleProp, addRoutine, clearAll, bulkInsert };
 }

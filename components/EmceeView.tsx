@@ -27,7 +27,7 @@ export default function EmceeView({ routines, setOnStage, markCompleted, removeF
 
   const readyQueue = useMemo(() =>
     routines
-      .filter(r => r.ready && !r.on_stage && !r.completed)
+      .filter(r => r.ready && !r.scratched && !r.on_stage && !r.completed)
       .sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999))
   , [routines]);
 

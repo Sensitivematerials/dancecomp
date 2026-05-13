@@ -92,6 +92,10 @@ export default function StageView({ routines, eventName, onLeave, activeBreak }:
     .sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999));
   const upNext = readyQueue[0];
 
+  const totalRoutines   = routines.filter(r => !r.scratched && !r.is_break).length;
+  const completedCount  = routines.filter(r => r.completed && !r.is_break).length;
+  const scratchedCount  = routines.filter(r => r.scratched).length;
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background:"var(--black)" }}>
       {effectiveBreak && <BreakBanner activeBreak={effectiveBreak} isEmcee={false} />}
@@ -103,6 +107,12 @@ export default function StageView({ routines, eventName, onLeave, activeBreak }:
         </div>
         <div className="flex items-center gap-3">
           <div className="font-mono text-[11px] tracking-[2px] uppercase text-gray-600 px-3 py-1 rounded-full border" style={{ borderColor:"var(--border)" }}>👁 Stage View — Read Only</div>
+          <div className="flex items-center gap-2 font-mono text-[11px]">
+            <span style={{ color: "#20d49c" }}>{completedCount} of {totalRoutines} complete</span>
+            {scratchedCount > 0 && (
+              <span style={{ color: "#ef4444" }}>· {scratchedCount} scratched</span>
+            )}
+          </div>
           <div className="font-mono text-[16px] text-gray-500">{clock}</div>
           <button onClick={onLeave} className="font-mono text-[11px] px-3 py-1.5 rounded-[8px] border text-gray-600 hover:text-white transition-colors" style={{ borderColor:"var(--border)" }}>Leave</button>
         </div>

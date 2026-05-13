@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-export interface Event { id: string; slug: string; name: string; date: string; location: string; created_at: string; show_started_at?: string | null; show_ended_at?: string | null; }
+export interface Event { id: string; slug: string; name: string; date: string; location: string; password?: string | null; created_at: string; show_started_at?: string | null; show_ended_at?: string | null; }
 export function useEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,9 +21,9 @@ export function useEvents() {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
-  const createEvent = useCallback(async (name: string, date: string, location: string): Promise<Event | null> => {
+  const createEvent = useCallback(async (name: string, date: string, location: string, password?: string): Promise<Event | null> => {
     const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" + Date.now();
-    const { data, error } = await supabase.from("events").insert({ slug, name, date, location }).select().single();
+    const { data, error } = await supabase.from("events").insert({ slug, name, date, location, password: password?.trim() || null }).select().single();
     if (error) { console.error("Create event failed:", error.message); return null; }
     return data as Event;
   }, []);
