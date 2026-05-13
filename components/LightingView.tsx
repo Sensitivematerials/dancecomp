@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Routine } from "@/types";
+import { Break } from "@/hooks/useBreak";
+import BreakBanner from "@/components/BreakBanner";
 
 const AMBER = "#f59e0b";
 const AMBER_DIM = "rgba(245,158,11,0.18)";
@@ -11,6 +13,7 @@ interface Props {
   routines: Routine[];
   eventName?: string;
   onLeave: () => void;
+  activeBreak: Break | null;
 }
 
 function LiveClock() {
@@ -26,7 +29,7 @@ function LiveClock() {
   return <span className="font-mono tabular-nums" style={{ color: "#6b7280" }}>{clock}</span>;
 }
 
-export default function LightingView({ routines, eventName, onLeave }: Props) {
+export default function LightingView({ routines, eventName, onLeave, activeBreak }: Props) {
   const onStage = routines.find(r => r.on_stage && !r.scratched) ?? null;
 
   const upNext = routines
@@ -38,10 +41,11 @@ export default function LightingView({ routines, eventName, onLeave }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--black)", color: "#eeeef5" }}>
+      {activeBreak && <BreakBanner activeBreak={activeBreak} isEmcee={false} />}
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div
-        className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0"
+        className={`flex items-center justify-between px-6 py-4 border-b flex-shrink-0${activeBreak ? " pt-[70px]" : ""}`}
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
         <div className="flex items-center gap-3">

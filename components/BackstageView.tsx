@@ -2,10 +2,12 @@
 import { useMemo, useState } from "react";
 import { getStatus, RoutineStatus } from "@/types";
 import { useRoutines } from "@/hooks/useRoutines";
+import { Break } from "@/hooks/useBreak";
+import BreakBanner from "@/components/BreakBanner";
 import EmptyState   from "./ui/EmptyState";
 import StatusBadge  from "./ui/StatusBadge";
 import Button        from "./ui/Button";
-type Props = ReturnType<typeof useRoutines>;
+type Props = ReturnType<typeof useRoutines> & { activeBreak: Break | null };
 type FilterKey = RoutineStatus | "all" | "scratched";
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All" },
@@ -16,7 +18,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "completed", label: "Done" },
   { key: "scratched", label: "✕ Scratched" },
 ];
-export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, addBreakToQueue, scratchRoutine, unScratch, deleteRoutine, reorderRoutine, updateNote, updateLightingNote }: Props) {
+export default function BackstageView({ routines, loading, checkIn, undoCheckIn, markReady, markNotReady, setOnStage, markCompleted, removeFromStage, toggleProp, addRoutine, addBreakToQueue, scratchRoutine, unScratch, deleteRoutine, reorderRoutine, updateNote, updateLightingNote, activeBreak }: Props) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [showAdd, setShowAdd] = useState(false);
@@ -72,6 +74,8 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
 
   return (
     <div>
+      {activeBreak && <BreakBanner activeBreak={activeBreak} isEmcee={false} />}
+      <div className={activeBreak ? "pt-14" : ""}>
       <div className="flex gap-2.5 mb-3.5">
         <input className="flex-1 h-[52px] rounded-[8px] border px-4 text-[15px] outline-none bg-[var(--card)] placeholder-gray-600 focus:border-[var(--border2)]" style={{ borderColor:"var(--border)" }} placeholder="Search by number, studio, title…" value={search} onChange={e => setSearch(e.target.value)} />
         <Button variant="amber" size="sm" onClick={() => { setShowInsertBreak(v => !v); setShowAdd(false); }}>
@@ -308,6 +312,7 @@ export default function BackstageView({ routines, loading, checkIn, undoCheckIn,
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

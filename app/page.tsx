@@ -225,7 +225,7 @@ export default function Home() {
   );
 
   if (role === "lighting") return (
-    <LightingView routines={routines.routines} eventName={activeEvent?.name} onLeave={() => { signOut(); setActiveEvent(null); }} />
+    <LightingView routines={routines.routines} eventName={activeEvent?.name} activeBreak={breakState.activeBreak} onLeave={() => { signOut(); setActiveEvent(null); }} />
   );
 
   if (fullscreen) return (
@@ -234,15 +234,15 @@ export default function Home() {
 
   return (
     <div>
-      {breakState.activeBreak && (
-        <BreakBanner activeBreak={breakState.activeBreak} onEnd={breakState.endBreak} isEmcee={role === "emcee"} />
+      {breakState.activeBreak && role === "emcee" && (
+        <BreakBanner activeBreak={breakState.activeBreak} onEnd={breakState.endBreak} isEmcee={true} />
       )}
       {!isOnline && (
         <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-2 py-2 font-mono text-[12px] font-bold text-black" style={{ background: "#f59e0b" }}>
           ⚠ OFFLINE — changes will sync when reconnected
         </div>
       )}
-      <div className={`${!isOnline && breakState.activeBreak ? "pt-28" : !isOnline || breakState.activeBreak ? "pt-14" : ""} h-screen flex flex-col overflow-hidden`}>
+      <div className={`${!isOnline && breakState.activeBreak && role === "emcee" ? "pt-28" : !isOnline || (breakState.activeBreak && role === "emcee") ? "pt-14" : ""} h-screen flex flex-col overflow-hidden`}>
         <Header view={view} setView={setView} role={role} userName={user.name}
           unread={chat.unread} chatOpen={chat.open}
           onToggleChat={chat.open ? chat.closeChat : chat.openChat}
@@ -255,7 +255,7 @@ export default function Home() {
           <main className="flex-1 overflow-y-auto p-4 md:p-7 transition-all duration-300" style={{ marginRight: chat.open ? "320px" : "0" }}>
             <div className="max-w-2xl mx-auto w-full">
               {view === "emcee" && <EmceeView {...routines} onFullscreen={() => setFullscreen(true)} breakState={breakState} />}
-              {view === "backstage" && <BackstageView {...routines} />}
+              {view === "backstage" && <BackstageView {...routines} activeBreak={breakState.activeBreak} />}
               {view === "import" && <ImportView onImport={async (rows) => { await routines.clearAll(); await routines.bulkInsert(rows as any); setView("backstage"); }} onReset={() => setShowReset(true)} />}
             </div>
           </main>
