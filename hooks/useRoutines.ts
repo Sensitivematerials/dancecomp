@@ -199,7 +199,7 @@ export function useRoutines(eventSlug = DEFAULT_EVENT, role?: "emcee" | "backsta
     if (data) { setRoutines(data); prevRoutines.current = data; }
   }, [routines, eventSlug]);
 
-  const scratchRoutine  = (id: string) => update(id, { scratched: true, on_stage: false });
+  const scratchRoutine  = (id: string) => update(id, { scratched: true, on_stage: false, checked_in: true, ready: true });
   const unScratch       = (id: string) => update(id, { scratched: false });
   const deleteRoutine   = useCallback(async (id: string) => {
     setRoutines(prev => prev.filter(r => r.id !== id));
