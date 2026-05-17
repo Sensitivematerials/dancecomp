@@ -138,3 +138,4 @@ dancecomp/
 - [ ] Reorder / skip routines
 - [ ] Offline backup mode
 - [ ] Judge / stage manager read-only display view
+
